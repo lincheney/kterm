@@ -1,44 +1,52 @@
 #include <QApplication>
 #include <QPushButton>
+#include <QTabWidget>
+#include <QVariant>
 #include "main.h"
-
-#include <KService>
 // #include <kde_terminal_interface.h>
 
-MainWindow::MainWindow() : KParts::MainWindow()
-{
-    KService::Ptr service = KService::serviceByDesktopName("konsolepart");
+KService::Ptr konsole_service;
 
-    if (! service) {
+Tabs::Tabs() : QTabWidget()
+{
+    m_service = KService::serviceByDesktopName("konsolepart");
+    if (! m_service) {
+        qApp->quit();
+        return;
+    }
+}
+
+void Tabs::add_tab()
+{
+    KParts::ReadOnlyPart* term = m_service->createInstance<KParts::ReadOnlyPart>();
+    if (! term) {
         qApp->quit();
         return;
     }
 
-    m_part = service->createInstance<KParts::ReadOnlyPart>(0);
-
-    if (! m_part) {
-        qApp->quit();
-        return;
-    }
-
-    // TerminalInterface* term = qobject_cast<TerminalInterface*>(m_part);
-
-    setCentralWidget(m_part->widget());
-    connect(m_part, SIGNAL(destroyed()), this, SLOT(slotConsoleDestroyed()) );
+    QWidget* widget = term->widget();
+    widget->setProperty("kpart", QVariant::fromValue(term));
+    connect(term, &QObject::destroyed, this, &Tabs::slotTermDestroyed);
+    addTab(widget, "XYZ");
 }
 
-void MainWindow::slotConsoleDestroyed()
+void Tabs::slotTermDestroyed(QObject* widget)
 {
-    qApp->quit();
+    int i = indexOf(qobject_cast<QWidget*>(widget));
+    removeTab(i);
+    if (count() == 0) {
+        close();
+    }
 }
-
 
 int main (int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    MainWindow* window = new MainWindow();
-    window->show();
+    Tabs* tabs = new Tabs();
+    tabs->show();
+    tabs->add_tab();
+    tabs->add_tab();
 
     return app.exec();
 }

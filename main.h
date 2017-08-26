@@ -1,16 +1,19 @@
-#include <KParts/MainWindow>
-#include <KParts/ReadOnlyPart>
+#include <QTabWidget>
 
-class MainWindow : public KParts::MainWindow
+#include <KParts/ReadOnlyPart>
+#include <KService>
+
+class Tabs : public QTabWidget
 {
     Q_OBJECT
 public:
-    MainWindow();
-    ~MainWindow() {};
+    Tabs();
+    ~Tabs() {};
+    void add_tab();
 
 public Q_SLOTS:
-    void slotConsoleDestroyed();
+    void slotTermDestroyed(QObject*);
 
 private:
-    KParts::ReadOnlyPart *m_part;
+    KService::Ptr m_service;
 };
