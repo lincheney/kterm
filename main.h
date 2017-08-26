@@ -15,5 +15,6 @@ public Q_SLOTS:
     void slotTermDestroyed(QObject*);
 
 private:
+    void changed_tab(int);
     KService::Ptr m_service;
 };

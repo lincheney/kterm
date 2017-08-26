@@ -14,6 +14,8 @@ Tabs::Tabs() : QTabWidget()
         qApp->quit();
         return;
     }
+
+    connect(this, &Tabs::currentChanged, this, &Tabs::changed_tab);
 }
 
 void Tabs::add_tab()
@@ -34,8 +36,14 @@ void Tabs::slotTermDestroyed(QObject* widget)
 {
     int i = indexOf(qobject_cast<QWidget*>(widget));
     removeTab(i);
-    if (count() == 0) {
+}
+
+void Tabs::changed_tab(int index)
+{
+    if (index == -1) {
         close();
+    } else {
+        widget(index)->setFocus();
     }
 }
 
