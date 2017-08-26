@@ -2,6 +2,7 @@
 #include <QPushButton>
 #include <QTabWidget>
 #include <QVariant>
+#include <QTabBar>
 #include "main.h"
 // #include <kde_terminal_interface.h>
 
@@ -16,6 +17,9 @@ Tabs::Tabs() : QTabWidget()
     }
 
     connect(this, &Tabs::currentChanged, this, &Tabs::changed_tab);
+
+    QTabBar* bar = tabBar();
+    bar->setDocumentMode(true);
 }
 
 void Tabs::add_tab()
