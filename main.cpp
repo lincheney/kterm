@@ -3,6 +3,7 @@
 #include "main.h"
 
 #include <KService>
+// #include <kde_terminal_interface.h>
 
 MainWindow::MainWindow() : KParts::MainWindow()
 {
@@ -19,6 +20,8 @@ MainWindow::MainWindow() : KParts::MainWindow()
         qApp->quit();
         return;
     }
+
+    // TerminalInterface* term = qobject_cast<TerminalInterface*>(m_part);
 
     setCentralWidget(m_part->widget());
     connect(m_part, SIGNAL(destroyed()), this, SLOT(slotConsoleDestroyed()) );
