@@ -3,6 +3,9 @@
 #include <QTabWidget>
 #include <QVariant>
 #include <QTabBar>
+#include <QDebug>
+#include <QStylePainter>
+// #include <
 #include "main.h"
 // #include <kde_terminal_interface.h>
 
@@ -18,7 +21,8 @@ Tabs::Tabs() : QTabWidget()
 
     connect(this, &Tabs::currentChanged, this, &Tabs::changed_tab);
 
-    QTabBar* bar = tabBar();
+    QTabBar* bar = new TabBar();
+    setTabBar(bar);
     bar->setDocumentMode(true);
 }
 
@@ -49,6 +53,31 @@ void Tabs::changed_tab(int index)
     } else {
         widget(index)->setFocus();
     }
+}
+
+void TabBar::paintEvent(QPaintEvent* ev)
+{
+    QTabBar::paintEvent(ev);
+    QStylePainter p(this);
+    for (int i = 0; i < count(); i++) {
+        QStyleOptionTab tab;
+        initStyleOption(&tab, i);
+        tab.state |= QStyle::State_HasFocus;
+        // tab.palette.setColor(QPalette::Window, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::WindowText, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::Base, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::AlternateBase, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::ToolTipBase, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::ToolTipText, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::Text, QColor(0xff,0,0));
+        tab.palette.setColor(QPalette::Button, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::ButtonText, QColor(0xff,0,0));
+        // tab.palette.setColor(QPalette::BrightText, QColor(0xff,0,0));
+        p.drawControl(QStyle::CE_TabBarTab, tab);
+    }
+    // p.setPen(Qt::blue);
+    // qDebug() << rect();
+    // p.drawRect(rect());
 }
 
 int main (int argc, char **argv)

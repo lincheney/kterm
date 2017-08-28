@@ -1,7 +1,16 @@
 #include <QTabWidget>
+#include <QTabBar>
+#include <QStyleOptionTab>
 
 #include <KParts/ReadOnlyPart>
 #include <KService>
+
+class TabBar: public QTabBar
+{
+    Q_OBJECT
+protected:
+    void paintEvent(QPaintEvent *);
+};
 
 class Tabs : public QTabWidget
 {
