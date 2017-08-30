@@ -49,3 +49,7 @@ CMakeLists.txt.user*
 
 # binary
 kterm
+
+# dbus
+kterm_adaptor.*
+kterm_interface.*

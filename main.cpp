@@ -1,6 +1,11 @@
 #include <QVariant>
+#include <QDBusConnection>
+#include <QDBusMessage>
 #include <QDebug>
 #include <kde_terminal_interface.h>
+
+#include "kterm_interface.h"
+#include "kterm_adaptor.h"
 
 #include "main.h"
 #include "tabwindow.h"
@@ -63,6 +68,17 @@ int main (int argc, char **argv)
         app.quit();
         return 1;
     }
+
+    if (!QDBusConnection::sessionBus().isConnected()) {
+        qWarning("Cannot connect to the D-Bus session bus.\n"
+                 "Please check your system settings and try again.\n");
+        return 1;
+    }
+
+    KtermAdaptor* a = new KtermAdaptor(&app);
+    QDBusConnection dbus = QDBusConnection::sessionBus();
+    dbus.registerObject("/", a, QDBusConnection::ExportAllSlots);
+    dbus.registerService("org.kterm");
 
     app.new_window();
 

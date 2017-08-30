@@ -15,9 +15,9 @@ public:
     TermApp(int &argc, char **argv) : QApplication(argc, argv) {};
     KService::Ptr konsole_service();
     TermPart* make_term();
-    void new_window();
 
 public Q_SLOTS:
+    void new_window();
     void slotTermActivityDetected();
     void slotTermSetWindowCaption(QString);
     void slotTermOverrideShortcut(QKeyEvent*, bool&);
