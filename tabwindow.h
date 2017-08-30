@@ -9,12 +9,12 @@ protected:
     void paintEvent(QPaintEvent *);
 };
 
-class Tabs : public QTabWidget
+class TabWindow : public QTabWidget
 {
     Q_OBJECT
 public:
-    Tabs();
-    ~Tabs() {};
+    TabWindow();
+    ~TabWindow() {};
     void add_tab();
 
 private:

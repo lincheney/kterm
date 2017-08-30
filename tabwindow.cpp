@@ -4,15 +4,15 @@
 #include "tabwindow.h"
 #include "main.h"
 
-Tabs::Tabs() : QTabWidget()
+TabWindow::TabWindow() : QTabWidget()
 {
-    connect(this, &Tabs::currentChanged, this, &Tabs::changed_tab);
+    connect(this, &TabWindow::currentChanged, this, &TabWindow::changed_tab);
     QTabBar* bar = new TabBar();
     setTabBar(bar);
     bar->setDocumentMode(true);
 }
 
-void Tabs::add_tab()
+void TabWindow::add_tab()
 {
     TermPart* part = ((TermApp*)qApp)->make_term();
     if (! part) {
@@ -26,7 +26,7 @@ void Tabs::add_tab()
     tabBar()->setTabData(index, QVariant::fromValue(part));
 }
 
-void Tabs::changed_tab(int index)
+void TabWindow::changed_tab(int index)
 {
     if (index == -1) {
         close();

@@ -51,7 +51,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    Tabs* tabs = new Tabs();
+    TabWindow* tabs = new TabWindow();
     tabs->show();
     tabs->add_tab();
     tabs->add_tab();
