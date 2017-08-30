@@ -7,8 +7,10 @@
 TabWindow::TabWindow(TermPart* part) : QTabWidget()
 {
     connect(this, &TabWindow::currentChanged, this, &TabWindow::changed_tab);
+
     QTabBar* bar = new TabBar();
     setTabBar(bar);
+    bar->setMovable(true);
     bar->setDocumentMode(true);
 
     QShortcut* shortcut;
