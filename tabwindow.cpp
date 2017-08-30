@@ -1,18 +1,37 @@
 #include <QStyleOptionTab>
 #include <QStylePainter>
+#include <QShortcut>
 
 #include "tabwindow.h"
-#include "main.h"
 
-TabWindow::TabWindow() : QTabWidget()
+TabWindow::TabWindow(TermPart* part) : QTabWidget()
 {
     connect(this, &TabWindow::currentChanged, this, &TabWindow::changed_tab);
     QTabBar* bar = new TabBar();
     setTabBar(bar);
     bar->setDocumentMode(true);
+
+    QShortcut* shortcut;
+    // new tab
+    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_T), this);
+    QObject::connect(shortcut, &QShortcut::activated, this, &TabWindow::new_tab);
+
+    // new window
+    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N), this);
+    QObject::connect(shortcut, &QShortcut::activated, (TermApp*)qApp, &TermApp::new_window);
+
+    // next tab
+    shortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
+    QObject::connect(shortcut, &QShortcut::activated,
+            [=]() { setCurrentIndex((currentIndex() + 1) % count()); });
+
+    // prev tab
+    shortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
+    QObject::connect(shortcut, &QShortcut::activated,
+            [=]() { setCurrentIndex((currentIndex() - 1 + count()) % count()); });
 }
 
-void TabWindow::add_tab()
+void TabWindow::new_tab()
 {
     TermPart* part = ((TermApp*)qApp)->make_term();
     if (! part) {
@@ -24,6 +43,7 @@ void TabWindow::add_tab()
     QWidget* widget = part->widget();
     int index = addTab(widget, "");
     tabBar()->setTabData(index, QVariant::fromValue(part));
+    setCurrentIndex(index);
 }
 
 void TabWindow::changed_tab(int index)

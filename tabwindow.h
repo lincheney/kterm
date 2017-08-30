@@ -2,6 +2,11 @@
 #include <QPaintEvent>
 #include <QTabWidget>
 
+#include "main.h"
+
+#ifndef TABWINDOW_H
+#define TABWINDOW_H
+
 class TabBar: public QTabBar
 {
     Q_OBJECT
@@ -13,10 +18,12 @@ class TabWindow : public QTabWidget
 {
     Q_OBJECT
 public:
-    TabWindow();
+    TabWindow(TermPart* = NULL);
     ~TabWindow() {};
-    void add_tab();
+    void new_tab();
 
 private:
     void changed_tab(int);
 };
+
+#endif

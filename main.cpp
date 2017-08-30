@@ -22,9 +22,17 @@ TermPart* TermApp::make_term()
     // connect(part, &QObject::destroyed, this, &TermApp::slotTermDestroyed);
     connect(part, SIGNAL(activityDetected()), SLOT(slotTermActivityDetected()));
     connect(part, &KParts::Part::setWindowCaption, this, &TermApp::slotTermSetWindowCaption);
+    connect(part, SIGNAL(overrideShortcut(QKeyEvent*, bool&)), SLOT(slotTermOverrideShortcut(QKeyEvent*, bool&)) );
     part->widget()->setProperty("kpart", QVariant::fromValue(part));
 
     return part;
+}
+
+void TermApp::new_window()
+{
+    TabWindow* tabs = new TabWindow();
+    tabs->show();
+    tabs->new_tab();
 }
 
 void TermApp::slotTermActivityDetected()
@@ -43,6 +51,11 @@ void TermApp::slotTermSetWindowCaption(QString caption)
     part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
 }
 
+void TermApp::slotTermOverrideShortcut(QKeyEvent*, bool &override)
+{
+    override = false;
+}
+
 int main (int argc, char **argv)
 {
     TermApp app(argc, argv);
@@ -51,10 +64,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    TabWindow* tabs = new TabWindow();
-    tabs->show();
-    tabs->add_tab();
-    tabs->add_tab();
+    app.new_window();
 
     return app.exec();
 }
