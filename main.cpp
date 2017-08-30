@@ -69,18 +69,21 @@ int main (int argc, char **argv)
         return 1;
     }
 
+#define DBUS_SERVICE "org.kterm"
+#define DBUS_PATH "/"
+
     QDBusConnection dbus = QDBusConnection::sessionBus();
     if (dbus.isConnected()) {
-        if (! dbus.registerService("org.kterm")) {
+        if (! dbus.registerService(DBUS_SERVICE)) {
             // app already exists, launch new window in existing one
-            org::kterm* iface = new org::kterm("org.kterm", "/", dbus);
+            org::kterm* iface = new org::kterm(DBUS_SERVICE, DBUS_PATH, dbus);
             iface->new_window().waitForFinished();
             return 0;
         }
 
         // expose on dbus
         KtermAdaptor* a = new KtermAdaptor(&app);
-        dbus.registerObject("/", a, QDBusConnection::ExportAllSlots);
+        dbus.registerObject(DBUS_PATH, a, QDBusConnection::ExportAllSlots);
     }
 
     app.new_window();
