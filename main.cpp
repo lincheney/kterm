@@ -1,67 +1,9 @@
-#include <QPushButton>
-#include <QTabWidget>
 #include <QVariant>
-#include <QTabBar>
 #include <QDebug>
-#include <QStylePainter>
-#include <QMetaMethod>
 #include <kde_terminal_interface.h>
 
 #include "main.h"
-
-Tabs::Tabs() : QTabWidget()
-{
-    connect(this, &Tabs::currentChanged, this, &Tabs::changed_tab);
-    QTabBar* bar = new TabBar();
-    setTabBar(bar);
-    bar->setDocumentMode(true);
-}
-
-void Tabs::add_tab()
-{
-    TermPart* part = ((TermApp*)qApp)->make_term();
-    if (! part) {
-        qApp->quit();
-        return;
-    }
-
-    part->setProperty("tabwidget", QVariant::fromValue(this));
-    QWidget* widget = part->widget();
-    int index = addTab(widget, "");
-    tabBar()->setTabData(index, QVariant::fromValue(part));
-}
-
-void Tabs::changed_tab(int index)
-{
-    if (index == -1) {
-        close();
-    } else {
-        QWidget* w = widget(index);
-        w->setFocus();
-
-        QObject* part = w->property("kpart").value<QObject*>();
-        part->setProperty("has_activity", QVariant(false));
-        tabBar()->update();
-    }
-}
-
-void TabBar::paintEvent(QPaintEvent* ev)
-{
-    QTabBar::paintEvent(ev);
-    QStylePainter p(this);
-    for (int i = 0; i < count(); i++) {
-        QStyleOptionTab tab;
-        initStyleOption(&tab, i);
-
-        TermPart* part = tabData(i).value<TermPart*>();
-        if (part->property("has_activity").toBool()) {
-            tab.state |= QStyle::State_HasFocus;
-        }
-        tab.text = part->property("term_title").toString();
-
-        p.drawControl(QStyle::CE_TabBarTab, tab);
-    }
-}
+#include "tabwindow.h"
 
 KService::Ptr TermApp::konsole_service()
 {

@@ -1,8 +1,4 @@
-#include <QTabWidget>
 #include <QApplication>
-#include <QTabBar>
-#include <QStyleOptionTab>
-
 #include <KParts/ReadOnlyPart>
 #include <KService>
 
@@ -26,26 +22,3 @@ protected:
 private:
     KService::Ptr m_service;
 };
-
-class TabBar: public QTabBar
-{
-    Q_OBJECT
-protected:
-    void paintEvent(QPaintEvent *);
-};
-
-class Tabs : public QTabWidget
-{
-    Q_OBJECT
-public:
-    Tabs();
-    ~Tabs() {};
-    void add_tab();
-
-private:
-    void changed_tab(int);
-};
-
-typedef struct {
-    KParts::ReadOnlyPart* term;
-} Term;
