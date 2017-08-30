@@ -69,16 +69,19 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    if (!QDBusConnection::sessionBus().isConnected()) {
-        qWarning("Cannot connect to the D-Bus session bus.\n"
-                 "Please check your system settings and try again.\n");
-        return 1;
-    }
-
-    KtermAdaptor* a = new KtermAdaptor(&app);
     QDBusConnection dbus = QDBusConnection::sessionBus();
-    dbus.registerObject("/", a, QDBusConnection::ExportAllSlots);
-    dbus.registerService("org.kterm");
+    if (dbus.isConnected()) {
+        if (! dbus.registerService("org.kterm")) {
+            // app already exists, launch new window in existing one
+            org::kterm* iface = new org::kterm("org.kterm", "/", dbus);
+            iface->new_window().waitForFinished();
+            return 0;
+        }
+
+        // expose on dbus
+        KtermAdaptor* a = new KtermAdaptor(&app);
+        dbus.registerObject("/", a, QDBusConnection::ExportAllSlots);
+    }
 
     app.new_window();
 
