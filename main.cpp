@@ -1,26 +1,17 @@
-#include <QApplication>
 #include <QPushButton>
 #include <QTabWidget>
 #include <QVariant>
 #include <QTabBar>
 #include <QDebug>
 #include <QStylePainter>
-// #include <
-#include "main.h"
-// #include <kde_terminal_interface.h>
+#include <QMetaMethod>
+#include <kde_terminal_interface.h>
 
-KService::Ptr konsole_service;
+#include "main.h"
 
 Tabs::Tabs() : QTabWidget()
 {
-    m_service = KService::serviceByDesktopName("konsolepart");
-    if (! m_service) {
-        qApp->quit();
-        return;
-    }
-
     connect(this, &Tabs::currentChanged, this, &Tabs::changed_tab);
-
     QTabBar* bar = new TabBar();
     setTabBar(bar);
     bar->setDocumentMode(true);
@@ -28,22 +19,16 @@ Tabs::Tabs() : QTabWidget()
 
 void Tabs::add_tab()
 {
-    KParts::ReadOnlyPart* term = m_service->createInstance<KParts::ReadOnlyPart>();
-    if (! term) {
+    TermPart* part = ((TermApp*)qApp)->make_term();
+    if (! part) {
         qApp->quit();
         return;
     }
 
-    QWidget* widget = term->widget();
-    widget->setProperty("kpart", QVariant::fromValue(term));
-    connect(term, &QObject::destroyed, this, &Tabs::slotTermDestroyed);
-    addTab(widget, "XYZ");
-}
-
-void Tabs::slotTermDestroyed(QObject* widget)
-{
-    int i = indexOf(qobject_cast<QWidget*>(widget));
-    removeTab(i);
+    part->setProperty("tabwidget", QVariant::fromValue(this));
+    QWidget* widget = part->widget();
+    int index = addTab(widget, "");
+    tabBar()->setTabData(index, QVariant::fromValue(part));
 }
 
 void Tabs::changed_tab(int index)
@@ -51,7 +36,12 @@ void Tabs::changed_tab(int index)
     if (index == -1) {
         close();
     } else {
-        widget(index)->setFocus();
+        QWidget* w = widget(index);
+        w->setFocus();
+
+        QObject* part = w->property("kpart").value<QObject*>();
+        part->setProperty("has_activity", QVariant(false));
+        tabBar()->update();
     }
 }
 
@@ -62,27 +52,62 @@ void TabBar::paintEvent(QPaintEvent* ev)
     for (int i = 0; i < count(); i++) {
         QStyleOptionTab tab;
         initStyleOption(&tab, i);
-        tab.state |= QStyle::State_HasFocus;
-        // tab.palette.setColor(QPalette::Window, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::WindowText, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::Base, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::AlternateBase, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::ToolTipBase, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::ToolTipText, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::Text, QColor(0xff,0,0));
-        tab.palette.setColor(QPalette::Button, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::ButtonText, QColor(0xff,0,0));
-        // tab.palette.setColor(QPalette::BrightText, QColor(0xff,0,0));
+
+        TermPart* part = tabData(i).value<TermPart*>();
+        if (part->property("has_activity").toBool()) {
+            tab.state |= QStyle::State_HasFocus;
+        }
+        tab.text = part->property("term_title").toString();
+
         p.drawControl(QStyle::CE_TabBarTab, tab);
     }
-    // p.setPen(Qt::blue);
-    // qDebug() << rect();
-    // p.drawRect(rect());
+}
+
+KService::Ptr TermApp::konsole_service()
+{
+    if (! m_service) {
+        m_service = KService::serviceByDesktopName("konsolepart");
+    }
+    return m_service;
+}
+
+TermPart* TermApp::make_term()
+{
+    TermPart* part = konsole_service()->createInstance<KParts::ReadOnlyPart>();
+    if (! part) return NULL;
+
+    QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
+    // connect(part, &QObject::destroyed, this, &TermApp::slotTermDestroyed);
+    connect(part, SIGNAL(activityDetected()), SLOT(slotTermActivityDetected()));
+    connect(part, &KParts::Part::setWindowCaption, this, &TermApp::slotTermSetWindowCaption);
+    part->widget()->setProperty("kpart", QVariant::fromValue(part));
+
+    return part;
+}
+
+void TermApp::slotTermActivityDetected()
+{
+    TermPart* part = (TermPart*)QObject::sender();
+    if (! part->widget()->hasFocus() && ! part->property("has_activity").toBool()) {
+        part->setProperty("has_activity", QVariant(true));
+        part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
+    }
+}
+
+void TermApp::slotTermSetWindowCaption(QString caption)
+{
+    QObject* part = QObject::sender();
+    part->setProperty("term_title", QVariant(caption));
+    part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
 }
 
 int main (int argc, char **argv)
 {
-    QApplication app(argc, argv);
+    TermApp app(argc, argv);
+    if (! app.konsole_service()) {
+        app.quit();
+        return 1;
+    }
 
     Tabs* tabs = new Tabs();
     tabs->show();
