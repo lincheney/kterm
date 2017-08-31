@@ -1,6 +1,7 @@
 #include <QStyleOptionTab>
 #include <QStylePainter>
 #include <QShortcut>
+#include <QDebug>
 
 #include "tabwindow.h"
 
@@ -10,7 +11,7 @@ TabWindow::TabWindow(TermPart* part) : QTabWidget()
 
     QTabBar* bar = new TabBar();
     setTabBar(bar);
-    bar->setMovable(true);
+    // bar->setMovable(true);
     bar->setDocumentMode(true);
 
     QShortcut* shortcut;
@@ -64,7 +65,7 @@ void TabWindow::changed_tab(int index)
 
 void TabBar::paintEvent(QPaintEvent* ev)
 {
-    QTabBar::paintEvent(ev);
+    // QTabBar::paintEvent(ev);
     QStylePainter p(this);
     for (int i = 0; i < count(); i++) {
         QStyleOptionTab tab;
@@ -77,5 +78,42 @@ void TabBar::paintEvent(QPaintEvent* ev)
         tab.text = part->property("term_title").toString();
 
         p.drawControl(QStyle::CE_TabBarTab, tab);
+    }
+}
+
+void TabBar::mouseMoveEvent(QMouseEvent* event)
+{
+    QTabBar::mouseMoveEvent(event);
+
+    if (event->buttons() & Qt::LeftButton) {
+        int current = currentIndex();
+        m_start_drag = m_start_drag || \
+                       current != -1 || \
+                       (event->pos() - m_drag_start).manhattanLength() > QApplication::startDragDistance();
+
+        if (m_start_drag) {
+            int i = tabAt(event->pos());
+            moveTab(current, i);
+        }
+    }
+}
+
+void TabBar::mousePressEvent(QMouseEvent* event)
+{
+    QTabBar::mousePressEvent(event);
+
+    if (event->button() == Qt::LeftButton) {
+        if (currentIndex() != -1) {
+            // highlight pressed tab
+            m_drag_start = event->pos();
+        }
+    }
+}
+
+void TabBar::mouseReleaseEvent(QMouseEvent* event)
+{
+    QTabBar::mousePressEvent(event);
+    if (event->button() == Qt::LeftButton) {
+        m_start_drag = false;
     }
 }

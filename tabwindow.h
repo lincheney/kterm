@@ -1,6 +1,7 @@
 #include <QTabBar>
 #include <QPaintEvent>
 #include <QTabWidget>
+#include <QPoint>
 
 #include "main.h"
 
@@ -12,6 +13,12 @@ class TabBar: public QTabBar
     Q_OBJECT
 protected:
     void paintEvent(QPaintEvent *);
+    void mouseMoveEvent(QMouseEvent*);
+    void mousePressEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*);
+private:
+    QPoint m_drag_start;
+    bool m_start_drag;
 };
 
 class TabWindow : public QTabWidget
