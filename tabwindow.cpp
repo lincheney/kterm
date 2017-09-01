@@ -5,7 +5,7 @@
 
 #include "tabwindow.h"
 
-TabWindow::TabWindow(TermPart* part) : QTabWidget()
+TabWindow::TabWindow() : QTabWidget()
 {
     connect(this, &TabWindow::currentChanged, this, &TabWindow::changed_tab);
 
@@ -17,11 +17,13 @@ TabWindow::TabWindow(TermPart* part) : QTabWidget()
     QShortcut* shortcut;
     // new tab
     shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_T), this);
-    QObject::connect(shortcut, &QShortcut::activated, this, &TabWindow::new_tab);
+    QObject::connect(shortcut, &QShortcut::activated,
+            [=](){ new_tab(NULL); });
 
     // new window
     shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N), this);
-    QObject::connect(shortcut, &QShortcut::activated, (TermApp*)qApp, &TermApp::new_window);
+    QObject::connect(shortcut, &QShortcut::activated, (TermApp*)qApp,
+            [=](){ qobject_cast<TermApp*>(qApp)->new_window(NULL); });
 
     // next tab
     shortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
@@ -34,9 +36,9 @@ TabWindow::TabWindow(TermPart* part) : QTabWidget()
             [=]() { setCurrentIndex((currentIndex() - 1 + count()) % count()); });
 }
 
-void TabWindow::new_tab()
+void TabWindow::new_tab(TermPart* part)
 {
-    TermPart* part = ((TermApp*)qApp)->make_term();
+    part = part ? part : qobject_cast<TermApp*>(qApp)->make_term();
     if (! part) {
         qApp->quit();
         return;
@@ -61,6 +63,13 @@ void TabWindow::changed_tab(int index)
         part->setProperty("has_activity", QVariant(false));
         tabBar()->update();
     }
+}
+
+void TabWindow::split_to_window(int index)
+{
+    TermPart* part = tabBar()->tabData(index).value<TermPart*>();
+    removeTab(index);
+    qobject_cast<TermApp*>(qApp)->new_window(part);
 }
 
 void TabBar::paintEvent(QPaintEvent* ev)
@@ -97,7 +106,7 @@ void TabBar::mouseMoveEvent(QMouseEvent* event)
 
         if (m_start_drag) {
             int i = tabAt(event->pos());
-            if (current != i) moveTab(current, i);
+            if (i != -1 && current != i) moveTab(current, i);
         }
     }
 }
@@ -114,8 +123,20 @@ void TabBar::mousePressEvent(QMouseEvent* event)
 void TabBar::mouseReleaseEvent(QMouseEvent* event)
 {
     QTabBar::mousePressEvent(event);
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton && m_start_drag) {
         m_start_drag = false;
-        repaint(tabRect(currentIndex()));
+
+        int current = currentIndex();
+        int i = tabAt(event->pos());
+        if (i == -1) {
+            int y = event->pos().y();
+            if (-y > QApplication::startDragDistance() || (y - height()) > QApplication::startDragDistance()) {
+                // new window
+                qobject_cast<TabWindow*>(parent())->split_to_window(current);
+                return;
+            }
+        } else if (current != i) moveTab(current, i);
+
+        repaint(tabRect(current));
     }
 }

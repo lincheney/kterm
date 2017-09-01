@@ -17,7 +17,7 @@ public:
     TermPart* make_term();
 
 public Q_SLOTS:
-    void new_window();
+    void new_window(TermPart*);
     void slotTermActivityDetected();
     void slotTermSetWindowCaption(QString);
     void slotTermOverrideShortcut(QKeyEvent*, bool&);

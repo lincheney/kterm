@@ -33,11 +33,11 @@ TermPart* TermApp::make_term()
     return part;
 }
 
-void TermApp::new_window()
+void TermApp::new_window(TermPart* part)
 {
     TabWindow* tabs = new TabWindow();
     tabs->show();
-    tabs->new_tab();
+    tabs->new_tab(part);
 }
 
 void TermApp::slotTermActivityDetected()
@@ -86,7 +86,7 @@ int main (int argc, char **argv)
         dbus.registerObject(DBUS_PATH, a, QDBusConnection::ExportAllSlots);
     }
 
-    app.new_window();
+    app.new_window(NULL);
 
     return app.exec();
 }

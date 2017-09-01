@@ -25,9 +25,10 @@ class TabWindow : public QTabWidget
 {
     Q_OBJECT
 public:
-    TabWindow(TermPart* = NULL);
+    TabWindow();
     ~TabWindow() {};
-    void new_tab();
+    void new_tab(TermPart*);
+    void split_to_window(int);
 
 private:
     void changed_tab(int);
