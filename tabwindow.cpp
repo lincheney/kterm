@@ -76,6 +76,9 @@ void TabBar::paintEvent(QPaintEvent* ev)
             tab.state |= QStyle::State_HasFocus;
         }
         tab.text = part->property("term_title").toString();
+        if (!m_start_drag || i != currentIndex()) {
+            tab.state &= ~QStyle::State_Sunken;
+        }
 
         p.drawControl(QStyle::CE_TabBarTab, tab);
     }
@@ -87,13 +90,14 @@ void TabBar::mouseMoveEvent(QMouseEvent* event)
 
     if (event->buttons() & Qt::LeftButton) {
         int current = currentIndex();
-        m_start_drag = m_start_drag || \
-                       current != -1 || \
-                       (event->pos() - m_drag_start).manhattanLength() > QApplication::startDragDistance();
+        if (! m_start_drag && current != -1 && (event->pos() - m_drag_start).manhattanLength() > QApplication::startDragDistance()) {
+            m_start_drag = true;
+            repaint(tabRect(current));
+        }
 
         if (m_start_drag) {
             int i = tabAt(event->pos());
-            moveTab(current, i);
+            if (current != i) moveTab(current, i);
         }
     }
 }
@@ -102,11 +106,8 @@ void TabBar::mousePressEvent(QMouseEvent* event)
 {
     QTabBar::mousePressEvent(event);
 
-    if (event->button() == Qt::LeftButton) {
-        if (currentIndex() != -1) {
-            // highlight pressed tab
-            m_drag_start = event->pos();
-        }
+    if (event->button() == Qt::LeftButton && currentIndex() != -1) {
+        m_drag_start = event->pos();
     }
 }
 
@@ -115,5 +116,6 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event)
     QTabBar::mousePressEvent(event);
     if (event->button() == Qt::LeftButton) {
         m_start_drag = false;
+        repaint(tabRect(currentIndex()));
     }
 }

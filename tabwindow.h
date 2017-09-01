@@ -18,7 +18,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent*);
 private:
     QPoint m_drag_start;
-    bool m_start_drag;
+    bool m_start_drag = false;
 };
 
 class TabWindow : public QTabWidget
