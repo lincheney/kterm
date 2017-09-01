@@ -72,7 +72,7 @@ void TabWindow::split_to_window(int index)
     qobject_cast<TermApp*>(qApp)->new_window(part);
 }
 
-void TabBar::paintEvent(QPaintEvent* ev)
+void TabBar::paintEvent(QPaintEvent*)
 {
     // QTabBar::paintEvent(ev);
     QStylePainter p(this);
@@ -130,7 +130,7 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event)
         int i = tabAt(event->pos());
         if (i == -1) {
             int y = event->pos().y();
-            if (-y > QApplication::startDragDistance() || (y - height()) > QApplication::startDragDistance()) {
+            if (count() > 1 && (-y > QApplication::startDragDistance() || (y - height()) > QApplication::startDragDistance())) {
                 // new window
                 qobject_cast<TabWindow*>(parent())->split_to_window(current);
                 return;
