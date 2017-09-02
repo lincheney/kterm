@@ -68,7 +68,7 @@ void TermApp::drag_tabs(QPoint pos, bool split)
     TabWindow* _old_window = dragged_part->property("tabwidget").value<TabWindow*>();
 
     if (!_new_window) {
-        if (split) {
+        if (split && _old_window->count() > 1) {
             _old_window->removeTab(_old_window->currentIndex());
             new_window(dragged_part);
         }
