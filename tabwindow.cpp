@@ -64,7 +64,7 @@ void TabWindow::changed_tab(int index)
 
         QObject* part = w->property("kpart").value<QObject*>();
         part->setProperty("has_activity", QVariant(false));
-        tabBar()->update(tabBar()->tabRect(index));
+        tabBar()->update();
     } else if (! qApp->dragged_part) {
         close();
     }

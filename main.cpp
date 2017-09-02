@@ -73,8 +73,7 @@ void TermApp::drag_tabs(QPoint pos, bool split)
             _old_window->removeTab(_old_window->currentIndex());
             new_window(dragged_part);
         } else {
-            bar = _old_window->tabBar();
-            bar->update(bar->tabRect(bar->currentIndex()));
+            _old_window->tabBar()->update();
         }
         return;
     }
@@ -92,7 +91,7 @@ void TermApp::drag_tabs(QPoint pos, bool split)
         _old_window->removeTab(_old_window->currentIndex());
         i = _new_window->new_tab(i, dragged_part);
     }
-    bar->update(bar->tabRect(i));
+    bar->update();
 }
 
 bool TermApp::eventFilter(QObject* obj, QEvent* event)
@@ -115,7 +114,7 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
                     int current = tabs->currentIndex();
                     if (!dragged_part && current != -1 && (mevent->globalPos() - m_drag_start).manhattanLength() > QApplication::startDragDistance()) {
                         dragged_part = bar->tabData(current).value<TermPart*>();
-                        bar->update(bar->tabRect(current));
+                        bar->update();
                     }
 
                     if (dragged_part) {
