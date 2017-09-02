@@ -64,6 +64,7 @@ void TermApp::slotTermOverrideShortcut(QKeyEvent*, bool &override)
 
 void TermApp::drag_tabs(QPoint pos, bool split)
 {
+    QTabBar* bar;
     TabWindow* _new_window = qobject_cast<TabWindow*>(topLevelAt(pos));
     TabWindow* _old_window = dragged_part->property("tabwidget").value<TabWindow*>();
 
@@ -71,18 +72,21 @@ void TermApp::drag_tabs(QPoint pos, bool split)
         if (split && _old_window->count() > 1) {
             _old_window->removeTab(_old_window->currentIndex());
             new_window(dragged_part);
+        } else {
+            bar = _old_window->tabBar();
+            bar->update(bar->tabRect(bar->currentIndex()));
         }
         return;
     }
 
-    QTabBar* bar = _new_window->tabBar();
+    bar = _new_window->tabBar();
     int i = bar->tabAt(bar->mapFromGlobal(pos));
 
     if (_old_window == _new_window) {
-        if (i == -1) return;
         // same tabbar , just move it about
         int current = _old_window->currentIndex();
-        if (current != i) bar->moveTab(current, i);
+        if (i == -1) i = current;
+        else if (current != i) bar->moveTab(current, i);
     } else {
         // diff tabwindow
         _old_window->removeTab(_old_window->currentIndex());
