@@ -36,8 +36,9 @@ TermPart* TermApp::make_term()
 void TermApp::new_window(TermPart* part)
 {
     TabWindow* tabs = new TabWindow();
+    tabs->tabBar()->installEventFilter(this);
     tabs->show();
-    tabs->new_tab(part);
+    tabs->new_tab(-1, part);
 }
 
 void TermApp::slotTermActivityDetected()
@@ -59,6 +60,78 @@ void TermApp::slotTermSetWindowCaption(QString caption)
 void TermApp::slotTermOverrideShortcut(QKeyEvent*, bool &override)
 {
     override = false;
+}
+
+void TermApp::drag_tabs(QPoint pos, bool split)
+{
+    TabWindow* _new_window = qobject_cast<TabWindow*>(topLevelAt(pos));
+    TabWindow* _old_window = dragged_part->property("tabwidget").value<TabWindow*>();
+
+    if (!_new_window) {
+        if (split) {
+            _old_window->removeTab(_old_window->currentIndex());
+            new_window(dragged_part);
+        }
+        return;
+    }
+
+    QTabBar* bar = _new_window->tabBar();
+    int i = bar->tabAt(bar->mapFromGlobal(pos));
+
+    if (_old_window == _new_window) {
+        if (i == -1) return;
+        // same tabbar , just move it about
+        int current = _old_window->currentIndex();
+        if (current != i) bar->moveTab(current, i);
+    } else {
+        // diff tabwindow
+        _old_window->removeTab(_old_window->currentIndex());
+        i = _new_window->new_tab(i, dragged_part);
+    }
+    bar->update(bar->tabRect(i));
+}
+
+bool TermApp::eventFilter(QObject* obj, QEvent* event)
+{
+    QTabBar* bar = qobject_cast<QTabBar*>(obj);
+    TabWindow* tabs = bar ? qobject_cast<TabWindow*>(bar->parent()) : NULL;
+    if (tabs) {
+        QMouseEvent* mevent;
+        switch (event->type()) {
+            case QEvent::MouseButtonPress:
+                mevent = static_cast<QMouseEvent*>(event);
+                if (mevent->button() == Qt::LeftButton && tabs->currentIndex() != -1) {
+                    m_drag_start = mevent->globalPos();
+                }
+                break;
+
+            case QEvent::MouseMove:
+                mevent = static_cast<QMouseEvent*>(event);
+                if (mevent->buttons() & Qt::LeftButton) {
+                    int current = tabs->currentIndex();
+                    if (!dragged_part && current != -1 && (mevent->globalPos() - m_drag_start).manhattanLength() > QApplication::startDragDistance()) {
+                        dragged_part = bar->tabData(current).value<TermPart*>();
+                        bar->update(bar->tabRect(current));
+                    }
+
+                    if (dragged_part) {
+                        drag_tabs(mevent->globalPos(), false);
+                    }
+                }
+                break;
+
+            case QEvent::MouseButtonRelease:
+                mevent = static_cast<QMouseEvent*>(event);
+                if (mevent->button() == Qt::LeftButton && dragged_part) {
+                    drag_tabs(mevent->globalPos(), true);
+                    dragged_part = NULL;
+                }
+                break;
+
+            default: break;
+        }
+    }
+    return false;
 }
 
 int main (int argc, char **argv)

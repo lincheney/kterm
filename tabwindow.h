@@ -13,12 +13,6 @@ class TabBar: public QTabBar
     Q_OBJECT
 protected:
     void paintEvent(QPaintEvent *);
-    void mouseMoveEvent(QMouseEvent*);
-    void mousePressEvent(QMouseEvent*);
-    void mouseReleaseEvent(QMouseEvent*);
-private:
-    QPoint m_drag_start;
-    bool m_start_drag = false;
 };
 
 class TabWindow : public QTabWidget
@@ -27,8 +21,7 @@ class TabWindow : public QTabWidget
 public:
     TabWindow();
     ~TabWindow() {};
-    void new_tab(TermPart*);
-    void split_to_window(int);
+    int new_tab(int, TermPart*);
 
 private:
     void changed_tab(int);
