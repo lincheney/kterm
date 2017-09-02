@@ -125,6 +125,14 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
                 if (mevent->button() == Qt::LeftButton && dragged_part) {
                     drag_tabs(mevent->globalPos(), true);
                     dragged_part = NULL;
+                    // kill any left over empty windows
+                    TabWindow* window;
+                    foreach(QObject* obj, topLevelWidgets()) {
+                        window = qobject_cast<TabWindow*>(obj);
+                        if (window && window->count() == 0) {
+                            window->close();
+                        }
+                    }
                 }
                 break;
 
