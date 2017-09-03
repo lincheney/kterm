@@ -24,8 +24,10 @@ TermPart* TermApp::make_term()
     if (! part) return NULL;
 
     QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
-    // connect(part, &QObject::destroyed, this, &TermApp::slotTermDestroyed);
+    QMetaObject::invokeMethod(part, "setMonitorSilenceEnabled", Qt::DirectConnection, Q_ARG(bool, true));
+
     connect(part, SIGNAL(activityDetected()), SLOT(slotTermActivityDetected()));
+    connect(part, SIGNAL(silenceDetected()), SLOT(slotTermSilenceDetected()));
     connect(part, &KParts::Part::setWindowCaption, this, &TermApp::slotTermSetWindowCaption);
     connect(part, SIGNAL(overrideShortcut(QKeyEvent*, bool&)), SLOT(slotTermOverrideShortcut(QKeyEvent*, bool&)) );
     part->widget()->setProperty("kpart", QVariant::fromValue(part));
@@ -46,6 +48,17 @@ void TermApp::slotTermActivityDetected()
     TermPart* part = (TermPart*)QObject::sender();
     if (! part->widget()->hasFocus() && ! part->property("has_activity").toBool()) {
         part->setProperty("has_activity", QVariant(true));
+        part->setProperty("has_silence", QVariant(false));
+        part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
+    }
+}
+
+void TermApp::slotTermSilenceDetected()
+{
+    TermPart* part = (TermPart*)QObject::sender();
+    if (! part->widget()->hasFocus() && ! part->property("has_silence").toBool() && part->property("has_activity").toBool()) {
+        part->setProperty("has_silence", QVariant(true));
+        part->setProperty("has_activity", QVariant(false));
         part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
     }
 }

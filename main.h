@@ -20,6 +20,7 @@ public:
 public Q_SLOTS:
     void new_window(TermPart*);
     void slotTermActivityDetected();
+    void slotTermSilenceDetected();
     void slotTermSetWindowCaption(QString);
     void slotTermOverrideShortcut(QKeyEvent*, bool&);
 
