@@ -37,6 +37,16 @@ TabWindow::TabWindow() : QTabWidget()
     shortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
     QObject::connect(shortcut, &QShortcut::activated,
             [=]() { setCurrentIndex((currentIndex() - 1 + count()) % count()); });
+
+    // move tab back
+    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left), this);
+    QObject::connect(shortcut, &QShortcut::activated,
+            [=]() { tabBar()->moveTab(currentIndex(), (currentIndex() - 1 + count()) % count() ); });
+
+    // move tab forward
+    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right), this);
+    QObject::connect(shortcut, &QShortcut::activated,
+            [=]() { tabBar()->moveTab(currentIndex(), (currentIndex() + 1) % count() ); });
 }
 
 int TabWindow::new_tab(int index, TermPart* part)
