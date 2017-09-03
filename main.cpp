@@ -52,9 +52,13 @@ void TermApp::slotTermActivityDetected()
 
 void TermApp::slotTermSetWindowCaption(QString caption)
 {
-    QObject* part = QObject::sender();
+    TermPart* part = qobject_cast<TermPart*>(QObject::sender());
     part->setProperty("term_title", QVariant(caption));
-    part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
+    QTabWidget* tabs = part->property("tabwidget").value<QTabWidget*>();
+    tabs->tabBar()->update();
+    if (tabs->currentWidget() == part->widget()) {
+        tabs->setWindowTitle(caption);
+    }
 }
 
 void TermApp::slotTermOverrideShortcut(QKeyEvent*, bool &override)
