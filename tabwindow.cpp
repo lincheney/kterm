@@ -3,6 +3,7 @@
 #include <QShortcut>
 #include <QDebug>
 #include <QDrag>
+#include <QAction>
 #include <QMimeData>
 
 #include "tabwindow.h"
@@ -17,36 +18,25 @@ TabWindow::TabWindow() : QTabWidget()
     bar->setDocumentMode(true);
     // setAcceptDrops(true);
 
-    QShortcut* shortcut;
-    // new tab
-    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_T), this);
-    QObject::connect(shortcut, &QShortcut::activated,
-            [=](){ new_tab(-1, NULL); });
+    QAction* action;
 
-    // new window
-    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N), this);
-    QObject::connect(shortcut, &QShortcut::activated, qApp,
-            [=](){ qApp->new_window(NULL); });
+#define MAKE_ACTION(text, shortcut, slot) \
+    action = new QAction(text, this); \
+    action->setShortcut(shortcut); \
+    connect(action, &QAction::triggered, slot); \
+    addAction(action)
 
-    // next tab
-    shortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
-    QObject::connect(shortcut, &QShortcut::activated,
-            [=]() { setCurrentIndex((currentIndex() + 1) % count()); });
+    MAKE_ACTION("New tab", Qt::CTRL + Qt::SHIFT + Qt::Key_T, [=](){ new_tab(-1, NULL); });
+    MAKE_ACTION("New window", Qt::CTRL + Qt::SHIFT + Qt::Key_N, [=](){ qApp->new_window(NULL); });
+    MAKE_ACTION("Next tab", Qt::SHIFT + Qt::Key_Right, [=](){ setCurrentIndex(offset_index(1)); });
+    MAKE_ACTION("Prev tab", Qt::SHIFT + Qt::Key_Left, [=](){ setCurrentIndex(offset_index(-1)); });
+    MAKE_ACTION("Move tab forward", Qt::CTRL + Qt::SHIFT + Qt::Key_Right, [=](){ tabBar()->moveTab(currentIndex(), offset_index(1)); });
+    MAKE_ACTION("Move tab backward", Qt::CTRL + Qt::SHIFT + Qt::Key_Left, [=](){ tabBar()->moveTab(currentIndex(), offset_index(-1)); });
+}
 
-    // prev tab
-    shortcut = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
-    QObject::connect(shortcut, &QShortcut::activated,
-            [=]() { setCurrentIndex((currentIndex() - 1 + count()) % count()); });
-
-    // move tab back
-    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left), this);
-    QObject::connect(shortcut, &QShortcut::activated,
-            [=]() { tabBar()->moveTab(currentIndex(), (currentIndex() - 1 + count()) % count() ); });
-
-    // move tab forward
-    shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right), this);
-    QObject::connect(shortcut, &QShortcut::activated,
-            [=]() { tabBar()->moveTab(currentIndex(), (currentIndex() + 1) % count() ); });
+int TabWindow::offset_index(int offset)
+{
+    return (currentIndex() + offset + count()) % count();
 }
 
 int TabWindow::new_tab(int index, TermPart* part)

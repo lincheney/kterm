@@ -25,6 +25,7 @@ public:
 
 private:
     void changed_tab(int);
+    int offset_index(int);
 };
 
 #endif
