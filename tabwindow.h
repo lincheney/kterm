@@ -11,8 +11,13 @@
 class TabBar: public QTabBar
 {
     Q_OBJECT
+    Q_PROPERTY(QColor labelfg MEMBER m_labelfg DESIGNABLE true)
+    Q_PROPERTY(QColor labelbg MEMBER m_labelbg DESIGNABLE true)
 protected:
     void paintEvent(QPaintEvent *);
+private:
+    QColor m_labelfg;
+    QColor m_labelbg;
 };
 
 class TabWindow : public QTabWidget

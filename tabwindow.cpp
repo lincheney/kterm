@@ -1,9 +1,11 @@
 #include <QStyleOptionTab>
 #include <QStylePainter>
 #include <QShortcut>
+#include <QFont>
 #include <QDebug>
 #include <QDrag>
 #include <QToolBar>
+#include <QLabel>
 #include <QAction>
 #include <QIcon>
 #include <QMimeData>
@@ -83,6 +85,7 @@ void TabWindow::changed_tab(int index)
 void TabBar::paintEvent(QPaintEvent*)
 {
     // QTabBar::paintEvent(ev);
+    char buffer[2] = " ";
     QStylePainter p(this);
     for (int i = 0; i < count(); i++) {
         QStyleOptionTab tab;
@@ -107,5 +110,19 @@ void TabBar::paintEvent(QPaintEvent*)
         }
 
         p.drawControl(QStyle::CE_TabBarTab, tab);
+
+        p.save();
+        p.setBrush(m_labelbg);
+        p.setPen(m_labelbg);
+        tab.rect.setWidth(tab.rect.height());
+        p.drawRect(tab.rect);
+
+        QFont font = p.font();
+        font.setBold(true);
+        p.setFont(font);
+        p.setPen(m_labelfg);
+        buffer[0] = '1' + i;
+        p.drawText(tab.rect, Qt::AlignCenter, buffer);
+        p.restore();
     }
 }
