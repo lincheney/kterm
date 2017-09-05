@@ -42,6 +42,17 @@ TabWindow::TabWindow() : QTabWidget()
     MAKE_ACTION("Prev tab", Qt::SHIFT + Qt::Key_Left, [=](){ setCurrentIndex(offset_index(-1)); });
     MAKE_ACTION("Move tab forward", Qt::CTRL + Qt::SHIFT + Qt::Key_Right, [=](){ tabBar()->moveTab(currentIndex(), offset_index(1)); });
     MAKE_ACTION("Move tab backward", Qt::CTRL + Qt::SHIFT + Qt::Key_Left, [=](){ tabBar()->moveTab(currentIndex(), offset_index(-1)); });
+
+    MAKE_ACTION("Go to tab 1", Qt::ALT + Qt::Key_1, [=](){ setCurrentIndex(0); });
+    MAKE_ACTION("Go to tab 2", Qt::ALT + Qt::Key_2, [=](){ setCurrentIndex(qMin(1, count()-1)); });
+    MAKE_ACTION("Go to tab 3", Qt::ALT + Qt::Key_3, [=](){ setCurrentIndex(qMin(2, count()-1)); });
+    MAKE_ACTION("Go to tab 4", Qt::ALT + Qt::Key_4, [=](){ setCurrentIndex(qMin(3, count()-1)); });
+    MAKE_ACTION("Go to tab 5", Qt::ALT + Qt::Key_5, [=](){ setCurrentIndex(qMin(4, count()-1)); });
+    MAKE_ACTION("Go to tab 6", Qt::ALT + Qt::Key_6, [=](){ setCurrentIndex(qMin(5, count()-1)); });
+    MAKE_ACTION("Go to tab 7", Qt::ALT + Qt::Key_7, [=](){ setCurrentIndex(qMin(6, count()-1)); });
+    MAKE_ACTION("Go to tab 8", Qt::ALT + Qt::Key_8, [=](){ setCurrentIndex(qMin(7, count()-1)); });
+    MAKE_ACTION("Go to tab 9", Qt::ALT + Qt::Key_9, [=](){ setCurrentIndex(qMin(8, count()-1)); });
+    MAKE_ACTION("Go to last tab", Qt::ALT + Qt::Key_0, [=](){ setCurrentIndex(count()-1); });
 }
 
 int TabWindow::offset_index(int offset)
