@@ -131,6 +131,9 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
                 if (mevent->buttons() & Qt::LeftButton) {
                     int current = tabs->currentIndex();
                     if (!dragged_part && current != -1 && (mevent->globalPos() - m_drag_start).manhattanLength() > QApplication::startDragDistance()) {
+                        // start dragging
+                        setOverrideCursor(Qt::DragCopyCursor);
+
                         dragged_part = bar->tabData(current).value<TermPart*>();
                         bar->update();
                     }
@@ -144,6 +147,9 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
             case QEvent::MouseButtonRelease:
                 mevent = static_cast<QMouseEvent*>(event);
                 if (mevent->button() == Qt::LeftButton && dragged_part) {
+                    // stop dragging
+                    setOverrideCursor(Qt::ArrowCursor);
+
                     drag_tabs(mevent->globalPos(), true);
                     dragged_part = NULL;
                     // kill any left over empty windows
