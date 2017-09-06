@@ -30,11 +30,11 @@ TabWindow::TabWindow() : QTabWidget()
     connect(action, &QAction::triggered, slot); \
     addAction(action)
 
-    MAKE_ACTION("New window", Qt::CTRL + Qt::SHIFT + Qt::Key_N, [=](){ qApp->new_window(NULL); });
+    MAKE_ACTION("New window", Qt::CTRL + Qt::SHIFT + Qt::Key_N, [=](){ qApp->new_window(NULL, current_dir()); });
     action->setIcon(QIcon::fromTheme("window-new"));
     toolbar->addAction(action);
 
-    MAKE_ACTION("New tab", Qt::CTRL + Qt::SHIFT + Qt::Key_T, [=](){ new_tab(-1, NULL); });
+    MAKE_ACTION("New tab", Qt::CTRL + Qt::SHIFT + Qt::Key_T, [=](){ new_tab(-1, NULL, current_dir()); });
     action->setIcon(QIcon::fromTheme("list-add"));
     toolbar->addAction(action);
 
@@ -91,6 +91,12 @@ void TabWindow::changed_tab(int index)
     } else if (! qApp->dragged_part) {
         close();
     }
+}
+
+QString TabWindow::current_dir()
+{
+    TerminalInterface* term = qobject_cast<TerminalInterface*>(currentWidget()->property("kpart").value<QObject*>());
+    return term->currentWorkingDirectory();
 }
 
 void TabBar::paintEvent(QPaintEvent*)

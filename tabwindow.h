@@ -2,6 +2,7 @@
 #include <QPaintEvent>
 #include <QTabWidget>
 #include <QPoint>
+#include <kde_terminal_interface.h>
 
 #include "main.h"
 
@@ -31,6 +32,7 @@ public:
 private:
     void changed_tab(int);
     int offset_index(int);
+    QString current_dir();
 };
 
 #endif

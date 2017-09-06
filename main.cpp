@@ -2,7 +2,6 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
-// #include <kde_terminal_interface.h>
 
 #include "kterm_interface.h"
 #include "kterm_adaptor.h"
