@@ -14,11 +14,12 @@ class TermApp: public QApplication
 public:
     TermApp(int &argc, char **argv) : QApplication(argc, argv) {};
     KService::Ptr konsole_service();
-    TermPart* make_term();
+    TermPart* make_term(QString);
     TermPart* dragged_part = NULL;
 
 public Q_SLOTS:
-    void new_window(TermPart*);
+    void new_window(TermPart*, QString);
+    void new_window(QString pwd){ new_window(NULL, pwd); };
     void slotTermActivityDetected();
     void slotTermSilenceDetected();
     void slotTermSetWindowCaption(QString);

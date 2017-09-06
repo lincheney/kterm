@@ -26,7 +26,7 @@ class TabWindow : public QTabWidget
 public:
     TabWindow();
     ~TabWindow() {};
-    int new_tab(int, TermPart*);
+    int new_tab(int, TermPart*, QString = QString());
 
 private:
     void changed_tab(int);

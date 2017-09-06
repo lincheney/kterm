@@ -60,9 +60,9 @@ int TabWindow::offset_index(int offset)
     return (currentIndex() + offset + count()) % count();
 }
 
-int TabWindow::new_tab(int index, TermPart* part)
+int TabWindow::new_tab(int index, TermPart* part, QString pwd)
 {
-    part = part ? part : qApp->make_term();
+    part = part ? part : qApp->make_term(pwd);
     if (! part) {
         qApp->quit();
         return -1;

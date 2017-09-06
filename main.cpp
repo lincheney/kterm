@@ -18,8 +18,10 @@ KService::Ptr TermApp::konsole_service()
     return m_service;
 }
 
-TermPart* TermApp::make_term()
+TermPart* TermApp::make_term(QString pwd)
 {
+    QDir::setCurrent(pwd);
+
     TermPart* part = konsole_service()->createInstance<KParts::ReadOnlyPart>();
     if (! part) return NULL;
 
@@ -35,12 +37,12 @@ TermPart* TermApp::make_term()
     return part;
 }
 
-void TermApp::new_window(TermPart* part)
+void TermApp::new_window(TermPart* part, QString pwd=QString())
 {
     TabWindow* tabs = new TabWindow();
     tabs->tabBar()->installEventFilter(this);
     tabs->show();
-    tabs->new_tab(-1, part);
+    tabs->new_tab(-1, part, pwd);
 }
 
 void TermApp::slotTermActivityDetected()
@@ -178,7 +180,7 @@ int main (int argc, char **argv)
         if (! dbus.registerService(DBUS_SERVICE)) {
             // app already exists, launch new window in existing one
             org::kterm* iface = new org::kterm(DBUS_SERVICE, DBUS_PATH, dbus);
-            iface->new_window().waitForFinished();
+            iface->new_window(QDir::currentPath()).waitForFinished();
             return 0;
         }
 
