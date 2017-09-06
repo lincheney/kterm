@@ -1,6 +1,5 @@
 #include <QVariant>
 #include <QDBusConnection>
-#include <QDBusMessage>
 #include <QDebug>
 
 #include "kterm_interface.h"

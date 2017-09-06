@@ -1,14 +1,12 @@
 #include <QStyleOptionTab>
 #include <QStylePainter>
-#include <QShortcut>
 #include <QFont>
 #include <QDebug>
-#include <QDrag>
 #include <QToolBar>
-#include <QLabel>
 #include <QAction>
 #include <QIcon>
-#include <QMimeData>
+#include <unistd.h>
+#include <sys/param.h>
 
 #include "tabwindow.h"
 
@@ -96,7 +94,17 @@ void TabWindow::changed_tab(int index)
 QString TabWindow::current_dir()
 {
     TerminalInterface* term = qobject_cast<TerminalInterface*>(currentWidget()->property("kpart").value<QObject*>());
-    return term->currentWorkingDirectory();
+    int pid = term->terminalProcessId();
+
+    char buffer[MAXPATHLEN+1], fname[100];
+    snprintf(fname, 100, "/proc/%i/cwd", pid);
+    int length = readlink(fname, buffer, MAXPATHLEN);
+    if (length == -1) {
+        return term->currentWorkingDirectory();
+    }
+
+    buffer[length] = '\0';
+    return buffer;
 }
 
 void TabBar::paintEvent(QPaintEvent*)
