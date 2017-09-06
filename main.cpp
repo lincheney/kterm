@@ -194,6 +194,13 @@ int main (int argc, char **argv)
         dbus.registerObject(DBUS_PATH, a, QDBusConnection::ExportAllSlots);
     }
 
+    QString path = QStandardPaths::locate(QStandardPaths::AppConfigLocation, "/stylesheet.qss");
+    if (! path.isNull()) {
+        QFile stylesheet(path);
+        if (stylesheet.open(QFile::ReadOnly)||1)
+            app.setStyleSheet(stylesheet.readAll());
+    }
+
     app.new_window(NULL);
 
     return app.exec();
