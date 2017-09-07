@@ -171,10 +171,6 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
 int main (int argc, char **argv)
 {
     TermApp app(argc, argv);
-    if (! app.konsole_service()) {
-        app.quit();
-        return 1;
-    }
 
 #define DBUS_SERVICE "org.kterm"
 #define DBUS_PATH "/"
@@ -201,6 +197,12 @@ int main (int argc, char **argv)
     }
 
     app.setWindowIcon(QIcon::fromTheme("utilities-terminal"));
+
+    if (! app.konsole_service() ) {
+        qCritical() << "Unable to start Konsole::Part service";
+        app.quit();
+        return 1;
+    }
     app.new_window(NULL);
 
     return app.exec();
