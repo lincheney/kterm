@@ -200,6 +200,7 @@ int main (int argc, char **argv)
             app.setStyleSheet(stylesheet.readAll());
     }
 
+    app.setWindowIcon(QIcon::fromTheme("utilities-terminal"));
     app.new_window(NULL);
 
     return app.exec();
