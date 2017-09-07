@@ -171,22 +171,30 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
 int main (int argc, char **argv)
 {
     TermApp app(argc, argv);
+    bool no_dbus = false;
+
+    for (int i = 1; i < argc; ++i)
+        if (! qstrcmp(argv[i], "--standalone"))
+            no_dbus = true;
+
+    if (no_dbus) {
 
 #define DBUS_SERVICE "org.kterm"
 #define DBUS_PATH "/"
 
-    QDBusConnection dbus = QDBusConnection::sessionBus();
-    if (dbus.isConnected()) {
-        if (! dbus.registerService(DBUS_SERVICE)) {
-            // app already exists, launch new window in existing one
-            org::kterm* iface = new org::kterm(DBUS_SERVICE, DBUS_PATH, dbus);
-            iface->new_window(QDir::currentPath()).waitForFinished();
-            return 0;
-        }
+        QDBusConnection dbus = QDBusConnection::sessionBus();
+        if (dbus.isConnected()) {
+            if (! dbus.registerService(DBUS_SERVICE)) {
+                // app already exists, launch new window in existing one
+                org::kterm* iface = new org::kterm(DBUS_SERVICE, DBUS_PATH, dbus);
+                iface->new_window(QDir::currentPath()).waitForFinished();
+                return 0;
+            }
 
-        // expose on dbus
-        KtermAdaptor* a = new KtermAdaptor(&app);
-        dbus.registerObject(DBUS_PATH, a, QDBusConnection::ExportAllSlots);
+            // expose on dbus
+            KtermAdaptor* a = new KtermAdaptor(&app);
+            dbus.registerObject(DBUS_PATH, a, QDBusConnection::ExportAllSlots);
+        }
     }
 
     QString path = QStandardPaths::locate(QStandardPaths::AppConfigLocation, "/stylesheet.qss");
