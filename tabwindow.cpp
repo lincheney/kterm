@@ -112,6 +112,9 @@ void TabBar::paintEvent(QPaintEvent*)
     // QTabBar::paintEvent(ev);
     char buffer[2] = " ";
     QStylePainter p(this);
+    int label_width = height();
+    QRect label_rect(0, 0, label_width, label_width);
+
     for (int i = 0; i < count(); i++) {
         QStyleOptionTab tab;
         initStyleOption(&tab, i);
@@ -134,20 +137,21 @@ void TabBar::paintEvent(QPaintEvent*)
             tab.state &= ~QStyle::State_Sunken;
         }
 
+        label_rect.moveTo(tab.rect.x(), tab.rect.y());
+        tab.rect.adjust(label_width, 0, 0, 0);
         p.drawControl(QStyle::CE_TabBarTab, tab);
 
         p.save();
         p.setBrush(m_labelbg);
         p.setPen(m_labelbg);
-        tab.rect.setWidth(tab.rect.height());
-        p.drawRect(tab.rect);
+        p.drawRect(label_rect);
 
         QFont font = p.font();
         font.setBold(true);
         p.setFont(font);
         p.setPen(m_labelfg);
         buffer[0] = '1' + i;
-        p.drawText(tab.rect, Qt::AlignCenter, buffer);
+        p.drawText(label_rect, Qt::AlignCenter, buffer);
         p.restore();
     }
 }
