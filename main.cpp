@@ -8,6 +8,14 @@
 #include "main.h"
 #include "tabwindow.h"
 
+QObject* find_child(QObject* parent, const char* classname)
+{
+    foreach(QObject* child, parent->children()) {
+        if (child->inherits(classname)) return child;
+    }
+    return NULL;
+}
+
 KService::Ptr TermApp::konsole_service()
 {
     if (! m_service) {
@@ -31,6 +39,10 @@ TermPart* TermApp::make_term(QString pwd)
     connect(part, &KParts::Part::setWindowCaption, this, &TermApp::slotTermSetWindowCaption);
     connect(part, SIGNAL(overrideShortcut(QKeyEvent*, bool&)), SLOT(slotTermOverrideShortcut(QKeyEvent*, bool&)) );
     part->widget()->setProperty("kpart", QVariant::fromValue(part));
+
+    QObject* view_mgr = find_child(part, "Konsole::ViewManager");
+    QObject* session_controller = find_child(view_mgr, "Konsole::SessionController");
+    part->setProperty("session_controller", QVariant::fromValue(session_controller));
 
     return part;
 }

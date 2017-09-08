@@ -51,6 +51,12 @@ TabWindow::TabWindow() : QTabWidget()
     MAKE_ACTION("Go to tab 8", Qt::ALT + Qt::Key_8, [=](){ setCurrentIndex(qMin(7, count()-1)); });
     MAKE_ACTION("Go to tab 9", Qt::ALT + Qt::Key_9, [=](){ setCurrentIndex(qMin(8, count()-1)); });
     MAKE_ACTION("Go to last tab", Qt::ALT + Qt::Key_0, [=](){ setCurrentIndex(count()-1); });
+
+    MAKE_ACTION("Find", Qt::CTRL + Qt::SHIFT + Qt::Key_F, [=](){
+        QObject* part = tabBar()->tabData(currentIndex()).value<TermPart*>();
+        QObject* session = part->property("session_controller").value<QObject*>();
+        QMetaObject::invokeMethod(session, "searchBarEvent", Qt::DirectConnection);
+    });
 }
 
 int TabWindow::offset_index(int offset)
