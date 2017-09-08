@@ -46,7 +46,9 @@ void TermApp::new_window(TermPart* part, QString pwd=QString())
 void TermApp::slotTermActivityDetected()
 {
     TermPart* part = (TermPart*)QObject::sender();
-    if (! part->widget()->hasFocus() && ! part->property("has_activity").toBool()) {
+    TabWindow* tabs = part->property("tabwidget").value<TabWindow*>();
+
+    if (tabs->currentWidget() != part->widget() && ! part->property("has_activity").toBool()) {
         part->setProperty("has_activity", QVariant(true));
         part->setProperty("has_silence", QVariant(false));
         part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
@@ -56,7 +58,9 @@ void TermApp::slotTermActivityDetected()
 void TermApp::slotTermSilenceDetected()
 {
     TermPart* part = (TermPart*)QObject::sender();
-    if (! part->widget()->hasFocus() && ! part->property("has_silence").toBool() && part->property("has_activity").toBool()) {
+    TabWindow* tabs = part->property("tabwidget").value<TabWindow*>();
+
+    if (tabs->currentWidget() != part->widget() && ! part->property("has_silence").toBool() && part->property("has_activity").toBool()) {
         part->setProperty("has_silence", QVariant(true));
         part->setProperty("has_activity", QVariant(false));
         part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
