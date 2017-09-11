@@ -1,6 +1,7 @@
 #include <QVariant>
 #include <QDBusConnection>
 #include <QDebug>
+#include <QX11Info>
 
 #include "kterm_interface.h"
 #include "kterm_adaptor.h"
@@ -198,9 +199,12 @@ int main (int argc, char **argv)
 #define DBUS_SERVICE "org.kterm"
 #define DBUS_PATH "/"
 
+        int x11_display = QX11Info::appScreen();
+        QString dbus_service = QString(DBUS_SERVICE ".x%1").arg(x11_display);
+
         QDBusConnection dbus = QDBusConnection::sessionBus();
         if (dbus.isConnected()) {
-            if (! dbus.registerService(DBUS_SERVICE)) {
+            if (! dbus.registerService(dbus_service)) {
                 // app already exists, launch new window in existing one
                 org::kterm* iface = new org::kterm(DBUS_SERVICE, DBUS_PATH, dbus);
                 iface->new_window(QDir::currentPath()).waitForFinished();
