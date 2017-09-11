@@ -194,7 +194,7 @@ int main (int argc, char **argv)
         if (! qstrcmp(argv[i], "--standalone"))
             no_dbus = true;
 
-    if (no_dbus) {
+    if (!no_dbus) {
 
 #define DBUS_SERVICE "org.kterm"
 #define DBUS_PATH "/"
@@ -206,7 +206,7 @@ int main (int argc, char **argv)
         if (dbus.isConnected()) {
             if (! dbus.registerService(dbus_service)) {
                 // app already exists, launch new window in existing one
-                org::kterm* iface = new org::kterm(DBUS_SERVICE, DBUS_PATH, dbus);
+                org::kterm* iface = new org::kterm(dbus_service, DBUS_PATH, dbus);
                 iface->new_window(QDir::currentPath()).waitForFinished();
                 return 0;
             }
