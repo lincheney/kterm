@@ -8,6 +8,7 @@
 
 #include "main.h"
 #include "tabwindow.h"
+#include "x.h"
 
 QObject* find_child(QObject* parent, const char* classname)
 {
@@ -199,8 +200,9 @@ int main (int argc, char **argv)
 #define DBUS_SERVICE "org.kterm"
 #define DBUS_PATH "/"
 
-        int x11_display = QX11Info::appScreen();
-        QString dbus_service = QString(DBUS_SERVICE ".x%1").arg(x11_display);
+        Display *d = QX11Info::display();
+        // skip the :
+        QString dbus_service = QString(DBUS_SERVICE ".x%1").arg(x_display(d)+1);
 
         QDBusConnection dbus = QDBusConnection::sessionBus();
         if (dbus.isConnected()) {
