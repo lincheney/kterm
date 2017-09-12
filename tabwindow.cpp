@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QToolBar>
 #include <QAction>
+#include <QMessageBox>
 #include <QIcon>
 #include <unistd.h>
 #include <sys/param.h>
@@ -111,6 +112,24 @@ QString TabWindow::current_dir()
 
     buffer[length] = '\0';
     return buffer;
+}
+
+void TabWindow::closeEvent(QCloseEvent* e)
+{
+    if (count() == 0) {
+        e->accept();
+        return;
+    }
+
+    QString msg = QString("You have %1 tab(s) open.\nAre you sure you want to quit?").arg(count());
+    QMessageBox::StandardButton reply = QMessageBox::question(
+            this, "Confirm close", msg, QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        e->accept();
+        return;
+    }
+    e->ignore();
 }
 
 void TabBar::paintEvent(QPaintEvent*)

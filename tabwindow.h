@@ -29,6 +29,9 @@ public:
     ~TabWindow() {};
     int new_tab(int, TermPart*, QString = QString());
 
+protected:
+    void closeEvent(QCloseEvent*);
+
 private:
     void changed_tab(int);
     int offset_index(int);
