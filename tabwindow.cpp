@@ -18,6 +18,7 @@ TabWindow::TabWindow() : QTabWidget()
     QTabBar* bar = new TabBar();
     setTabBar(bar);
     bar->setDocumentMode(true);
+    bar->setFocusPolicy(Qt::NoFocus);
 
     QToolBar* toolbar = new QToolBar();
     setCornerWidget(toolbar);
