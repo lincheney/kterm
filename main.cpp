@@ -202,7 +202,7 @@ int main (int argc, char **argv)
 
         Display *d = QX11Info::display();
         // skip the :
-        QString dbus_service = QString(DBUS_SERVICE ".x%1").arg(x_display(d)+1);
+        QString dbus_service = QString(DBUS_SERVICE ".x" GIT_REF ".x%1").arg(x_display(d)+1);
 
         QDBusConnection dbus = QDBusConnection::sessionBus();
         if (dbus.isConnected()) {
