@@ -1,6 +1,7 @@
 #include <QStyleOptionTab>
 #include <QStylePainter>
 #include <QFont>
+#include <QScrollBar>
 #include <QDebug>
 #include <QToolBar>
 #include <QAction>
@@ -58,6 +59,15 @@ TabWindow::TabWindow() : QTabWidget()
         QObject* part = tabBar()->tabData(currentIndex()).value<TermPart*>();
         QObject* session = part->property("session_controller").value<QObject*>();
         QMetaObject::invokeMethod(session, "searchBarEvent", Qt::DirectConnection);
+    });
+
+    MAKE_ACTION("Scroll to top", Qt::SHIFT + Qt::Key_Home, [=](){
+        QScrollBar* scrollbar = currentWidget()->property("scrollbar").value<QScrollBar*>();
+        scrollbar->setValue(0);
+    });
+    MAKE_ACTION("Scroll to bottom", Qt::SHIFT + Qt::Key_End, [=](){
+        QScrollBar* scrollbar = currentWidget()->property("scrollbar").value<QScrollBar*>();
+        scrollbar->setValue(scrollbar->maximum());
     });
 }
 

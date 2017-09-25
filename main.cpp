@@ -1,5 +1,6 @@
 #include <QVariant>
 #include <QDBusConnection>
+#include <QScrollBar>
 #include <QDebug>
 #include <QX11Info>
 
@@ -44,6 +45,10 @@ TermPart* TermApp::make_term(QString pwd)
 
     QObject* view_mgr = find_child(part, "Konsole::ViewManager");
     QObject* session_controller = find_child(view_mgr, "Konsole::SessionController");
+
+    QScrollBar* scrollbar = part->widget()->findChild<QScrollBar*>(QString(), Qt::FindChildrenRecursively);
+    part->widget()->setProperty("scrollbar", QVariant::fromValue(scrollbar));
+
     part->setProperty("session_controller", QVariant::fromValue(session_controller));
 
     return part;
