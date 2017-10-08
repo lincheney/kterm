@@ -31,7 +31,7 @@ TabWindow::TabWindow() : QTabWidget()
     QAction* action;
 #define MAKE_ACTION(text, shortcut, slot) \
     action = new QAction(text, this); \
-    action->setShortcut(shortcut); \
+    action->setData(shortcut); \
     connect(action, &QAction::triggered, slot); \
     addAction(action)
 
@@ -73,6 +73,17 @@ TabWindow::TabWindow() : QTabWidget()
         QScrollBar* scrollbar = currentWidget()->property("scrollbar").value<QScrollBar*>();
         scrollbar->setValue(scrollbar->maximum());
     });
+
+    load_settings(new QSettings());
+}
+
+void TabWindow::load_settings(QSettings* settings)
+{
+    foreach(QAction* action, actions()) {
+        QVariant keystr = settings->value(action->text());
+        QKeySequence keyseq = keystr.isValid() ? QKeySequence(keystr.toString()) : QKeySequence(action->data().toInt());
+        action->setShortcut(keyseq);
+    }
 }
 
 int TabWindow::offset_index(int offset)

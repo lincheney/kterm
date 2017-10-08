@@ -2,6 +2,7 @@
 #include <QPaintEvent>
 #include <QTabWidget>
 #include <QPoint>
+#include <QSettings>
 #include <kde_terminal_interface.h>
 
 #include "main.h"
@@ -29,6 +30,7 @@ public:
     TabWindow();
     ~TabWindow() {};
     int new_tab(int, TermPart*, QString = QString());
+    void load_settings(QSettings*);
 
 protected:
     void closeEvent(QCloseEvent*);
