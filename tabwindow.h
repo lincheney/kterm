@@ -16,6 +16,7 @@ class TabBar: public QTabBar
     Q_PROPERTY(QColor labelbg MEMBER m_labelbg DESIGNABLE true)
 protected:
     void paintEvent(QPaintEvent *);
+    void resizeEvent(QResizeEvent *);
 private:
     QColor m_labelfg;
     QColor m_labelbg;

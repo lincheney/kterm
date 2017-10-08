@@ -3,7 +3,8 @@
 #include <QFont>
 #include <QScrollBar>
 #include <QDebug>
-#include <QToolBar>
+#include <QToolButton>
+#include <QMenu>
 #include <QAction>
 #include <QMessageBox>
 #include <QIcon>
@@ -22,8 +23,10 @@ TabWindow::TabWindow() : QTabWidget()
     bar->setFocusPolicy(Qt::NoFocus);
     bar->setElideMode(Qt::ElideLeft);
 
-    QToolBar* toolbar = new QToolBar();
-    setCornerWidget(toolbar);
+    QToolButton* menu_button = new QToolButton();
+    menu_button->setPopupMode(QToolButton::InstantPopup);
+    menu_button->setIcon(QIcon::fromTheme("system-run"));
+    setCornerWidget(menu_button);
 
     QAction* action;
 #define MAKE_ACTION(text, shortcut, slot) \
@@ -34,11 +37,11 @@ TabWindow::TabWindow() : QTabWidget()
 
     MAKE_ACTION("New window", Qt::CTRL + Qt::SHIFT + Qt::Key_N, [=](){ qApp->new_window(NULL, current_dir()); });
     action->setIcon(QIcon::fromTheme("window-new"));
-    toolbar->addAction(action);
+    menu_button->addAction(action);
 
     MAKE_ACTION("New tab", Qt::CTRL + Qt::SHIFT + Qt::Key_T, [=](){ new_tab(-1, NULL, current_dir()); });
     action->setIcon(QIcon::fromTheme("list-add"));
-    toolbar->addAction(action);
+    menu_button->addAction(action);
 
     MAKE_ACTION("Next tab", Qt::SHIFT + Qt::Key_Right, [=](){ setCurrentIndex(offset_index(1)); });
     MAKE_ACTION("Prev tab", Qt::SHIFT + Qt::Key_Left, [=](){ setCurrentIndex(offset_index(-1)); });
@@ -142,6 +145,15 @@ void TabWindow::closeEvent(QCloseEvent* e)
         return;
     }
     e->ignore();
+}
+
+void TabBar::resizeEvent(QResizeEvent* e)
+{
+    QTabWidget* tabs = qobject_cast<QTabWidget*>(parent());
+    QToolButton* button = qobject_cast<QToolButton*>(tabs->cornerWidget());
+    button->setIconSize(QSize(height(), height()));
+
+    QTabBar::resizeEvent(e);
 }
 
 void TabBar::paintEvent(QPaintEvent*)
