@@ -20,6 +20,7 @@ TabWindow::TabWindow() : QTabWidget()
     setTabBar(bar);
     bar->setDocumentMode(true);
     bar->setFocusPolicy(Qt::NoFocus);
+    bar->setElideMode(Qt::ElideLeft);
 
     QToolBar* toolbar = new QToolBar();
     setCornerWidget(toolbar);
@@ -87,7 +88,7 @@ int TabWindow::new_tab(int index, TermPart* part, QString pwd)
     part->setProperty("tabwidget", QVariant::fromValue(this));
     QWidget* widget = part->widget();
     widget->setProperty("kpart", QVariant::fromValue(part));
-    index = insertTab(index, widget, "");
+    index = insertTab(index, widget, part->property("term_title").toString());
     tabBar()->setTabData(index, QVariant::fromValue(part));
     setCurrentIndex(index);
     return index;
@@ -154,9 +155,11 @@ void TabBar::paintEvent(QPaintEvent*)
     for (int i = 0; i < count(); i++) {
         QStyleOptionTab tab;
         initStyleOption(&tab, i);
+        label_rect.moveTo(tab.rect.x(), tab.rect.y());
+        tab.rect.adjust(label_width, 0, 0, 0);
 
         TermPart* part = tabData(i).value<TermPart*>();
-        tab.text = part->property("term_title").toString();
+        tab.text = fontMetrics().elidedText(part->property("term_title").toString(), elideMode(), tab.rect.width());
 
         if (part->property("has_activity").toBool()) {
             tab.state |= QStyle::State_On;
@@ -173,8 +176,6 @@ void TabBar::paintEvent(QPaintEvent*)
             tab.state &= ~QStyle::State_Sunken;
         }
 
-        label_rect.moveTo(tab.rect.x(), tab.rect.y());
-        tab.rect.adjust(label_width, 0, 0, 0);
         p.drawControl(QStyle::CE_TabBarTab, tab);
 
         p.save();
