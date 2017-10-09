@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QKeyEvent>
+#include <QSettings>
 #include <KParts/ReadOnlyPart>
 #include <KService>
 
@@ -16,6 +17,7 @@ public:
     KService::Ptr konsole_service();
     TermPart* make_term(QString);
     TermPart* dragged_part = NULL;
+    QSettings* settings() { return m_settings; }
 
 public Q_SLOTS:
     void new_window(TermPart*, QString);
@@ -24,6 +26,7 @@ public Q_SLOTS:
     void slotTermSilenceDetected();
     void slotTermSetWindowCaption(QString);
     void slotTermOverrideShortcut(QKeyEvent*, bool&);
+    void load_settings();
 
 protected:
     void updateTermTitle(QObject*);
@@ -33,6 +36,7 @@ private:
     void drag_tabs(QPoint, bool);
     KService::Ptr m_service;
     QPoint m_drag_start;
+    QSettings* m_settings;
 };
 
 #define qApp (static_cast<TermApp*>(QCoreApplication::instance()))

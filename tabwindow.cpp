@@ -80,7 +80,7 @@ TabWindow::TabWindow() : QTabWidget()
 void TabWindow::load_settings(QSettings* settings)
 {
     foreach(QAction* action, actions()) {
-        QVariant keystr = settings->value(action->text());
+        QVariant keystr = settings->value("shortcuts/" + action->text());
         QKeySequence keyseq = keystr.isValid() ? QKeySequence(keystr.toString()) : QKeySequence(action->data().toInt());
         action->setShortcut(keyseq);
     }

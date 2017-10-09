@@ -102,6 +102,29 @@ void TermApp::slotTermOverrideShortcut(QKeyEvent*, bool &override)
     override = false;
 }
 
+void TermApp::load_settings() {
+    m_settings = new QSettings();
+
+    QString path = m_settings->value("stylesheet").toString();
+    if (! path.isNull()) {
+        if (path.startsWith('~')) {
+            path = QDir::home().path() + path.rightRef(path.length() - 1);
+        }
+
+        QFile stylesheet(path);
+        if (stylesheet.open(QFile::ReadOnly))
+            setStyleSheet(stylesheet.readAll());
+        else
+            qWarning() << "Could not open" << path;
+    }
+
+    TabWindow* window;
+    foreach(QObject* obj, topLevelWidgets()) {
+        window = qobject_cast<TabWindow*>(obj);
+        if (window) window->load_settings(m_settings);
+    }
+}
+
 void TermApp::drag_tabs(QPoint pos, bool split)
 {
     QTabBar* bar;
@@ -194,6 +217,7 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
 int main (int argc, char **argv)
 {
     TermApp app(argc, argv);
+    app.setOrganizationDomain(app.applicationName());
     bool no_dbus = false;
 
     for (int i = 1; i < argc; ++i)
@@ -224,13 +248,7 @@ int main (int argc, char **argv)
         }
     }
 
-    QString path = QStandardPaths::locate(QStandardPaths::AppConfigLocation, "/stylesheet.qss");
-    if (! path.isNull()) {
-        QFile stylesheet(path);
-        if (stylesheet.open(QFile::ReadOnly)||1)
-            app.setStyleSheet(stylesheet.readAll());
-    }
-
+    app.load_settings();
     app.setWindowIcon(QIcon::fromTheme("utilities-terminal"));
 
     if (! app.konsole_service() ) {
