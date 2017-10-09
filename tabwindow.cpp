@@ -32,6 +32,7 @@ TabWindow::TabWindow() : QTabWidget()
 #define MAKE_ACTION(text, shortcut, slot) \
     action = new QAction(text, this); \
     action->setData(shortcut); \
+    action->setProperty("key", text); \
     connect(action, &QAction::triggered, slot); \
     addAction(action)
 
@@ -41,6 +42,10 @@ TabWindow::TabWindow() : QTabWidget()
 
     MAKE_ACTION("New tab", Qt::CTRL + Qt::SHIFT + Qt::Key_T, [=](){ new_tab(-1, NULL, current_dir()); });
     action->setIcon(QIcon::fromTheme("list-add"));
+    menu_button->addAction(action);
+
+    MAKE_ACTION("Reload settings", 0, [=](){ qApp->load_settings(); });
+    action->setIcon(QIcon::fromTheme("view-refresh"));
     menu_button->addAction(action);
 
     MAKE_ACTION("Next tab", Qt::SHIFT + Qt::Key_Right, [=](){ setCurrentIndex(offset_index(1)); });
@@ -80,7 +85,7 @@ TabWindow::TabWindow() : QTabWidget()
 void TabWindow::load_settings(QSettings* settings)
 {
     foreach(QAction* action, actions()) {
-        QVariant keystr = settings->value("shortcuts/" + action->text());
+        QVariant keystr = settings->value("shortcuts/" + action->property("key").toString());
         QKeySequence keyseq = keystr.isValid() ? QKeySequence(keystr.toString()) : QKeySequence(action->data().toInt());
         action->setShortcut(keyseq);
     }
