@@ -108,7 +108,7 @@ void TermApp::load_settings() {
     QString path = m_settings->value("stylesheet").toString();
     if (! path.isNull()) {
         if (path.startsWith('~')) {
-            path = QDir::home().path() + path.rightRef(path.length() - 1);
+            path = QDir::home().path() % path.rightRef(path.length() - 1);
         }
 
         QFile stylesheet(path);
