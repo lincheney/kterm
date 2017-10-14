@@ -137,9 +137,16 @@ int main (int argc, char **argv)
     app.setOrganizationDomain(app.applicationName());
     bool no_dbus = false;
 
-    for (int i = 1; i < argc; ++i)
-        if (! qstrcmp(argv[i], "--standalone"))
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (! qstrcmp(argv[i], "--standalone")) {
             no_dbus = true;
+        } else {
+            if (! qstrcmp(argv[i], "-e")) i++;
+            break;
+        }
+    }
+    QStringList arg_list = app.arguments().mid(i);
 
     if (!no_dbus) {
 
@@ -173,7 +180,7 @@ int main (int argc, char **argv)
         app.quit();
         return 1;
     }
-    app.new_window(NULL);
+    app.new_window(NULL, QString(), arg_list);
 
     return app.exec();
 }
