@@ -17,7 +17,7 @@ public:
 
 public Q_SLOTS:
     void new_window(Terminal* = NULL, const QString& = QString(), const QStringList& = QStringList());
-    void new_window(QString pwd){ new_window(NULL, pwd, QStringList()); };
+    void new_window(const QString& pwd, const QStringList& args){ new_window(NULL, pwd, args); };
     void load_settings();
 
 protected:

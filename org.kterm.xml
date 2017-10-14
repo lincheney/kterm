@@ -3,6 +3,7 @@
   <interface name="org.kterm">
     <method name="new_window">
         <arg name="pwd" type="s" direction="in"/>
+        <arg name="args" type="as" direction="in"/>
     </method>
   </interface>
 </node>

@@ -162,7 +162,7 @@ int main (int argc, char **argv)
             if (! dbus.registerService(dbus_service)) {
                 // app already exists, launch new window in existing one
                 org::kterm* iface = new org::kterm(dbus_service, DBUS_PATH, dbus);
-                iface->new_window(QDir::currentPath()).waitForFinished();
+                iface->new_window(QDir::currentPath(), arg_list).waitForFinished();
                 return 0;
             }
 
