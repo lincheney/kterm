@@ -12,6 +12,7 @@
 #include <sys/param.h>
 
 #include "tabwindow.h"
+#include "main.h"
 
 TabWindow::TabWindow() : QTabWidget()
 {
@@ -65,18 +66,16 @@ TabWindow::TabWindow() : QTabWidget()
     MAKE_ACTION("Go to last tab", Qt::ALT + Qt::Key_0, [=](){ setCurrentIndex(count()-1); });
 
     MAKE_ACTION("Find", Qt::CTRL + Qt::SHIFT + Qt::Key_F, [=](){
-        QObject* part = tabBar()->tabData(currentIndex()).value<TermPart*>();
-        QObject* session = part->property("session_controller").value<QObject*>();
-        QMetaObject::invokeMethod(session, "searchBarEvent", Qt::DirectConnection);
+            QObject* sc = currentTerminal()->session_controller();
+            QMetaObject::invokeMethod(sc, "searchBarEvent", Qt::DirectConnection);
     });
 
     MAKE_ACTION("Scroll to top", Qt::SHIFT + Qt::Key_Home, [=](){
-        QScrollBar* scrollbar = currentWidget()->property("scrollbar").value<QScrollBar*>();
-        scrollbar->setValue(0);
+            currentTerminal()->scrollbar()->setValue(0);
     });
     MAKE_ACTION("Scroll to bottom", Qt::SHIFT + Qt::Key_End, [=](){
-        QScrollBar* scrollbar = currentWidget()->property("scrollbar").value<QScrollBar*>();
-        scrollbar->setValue(scrollbar->maximum());
+            QScrollBar* bar = currentTerminal()->scrollbar();
+            bar->setValue(bar->maximum());
     });
 
     load_settings(new QSettings());
@@ -96,19 +95,17 @@ int TabWindow::offset_index(int offset)
     return (currentIndex() + offset + count()) % count();
 }
 
-int TabWindow::new_tab(int index, TermPart* part, QString pwd)
+int TabWindow::new_tab(int index, Terminal* term, QString pwd)
 {
-    part = part ? part : qApp->make_term(pwd);
-    if (! part) {
+    term = term ? term : Terminal::make_term();
+    if (! term) {
         qApp->quit();
         return -1;
     }
 
-    part->setProperty("tabwidget", QVariant::fromValue(this));
-    QWidget* widget = part->widget();
-    widget->setProperty("kpart", QVariant::fromValue(part));
-    index = insertTab(index, widget, part->property("term_title").toString());
-    tabBar()->setTabData(index, QVariant::fromValue(part));
+    term->tabwidget = this;
+    index = insertTab(index, term, term->title);
+    tabBar()->setTabData(index, QVariant::fromValue(term));
     setCurrentIndex(index);
     return index;
 }
@@ -116,14 +113,13 @@ int TabWindow::new_tab(int index, TermPart* part, QString pwd)
 void TabWindow::changed_tab(int index)
 {
     if (index != -1) {
-        QWidget* w = widget(index);
-        w->setFocus();
+        Terminal* term = qobject_cast<Terminal*>(widget(index));
+        term->setFocus();
 
-        QObject* part = w->property("kpart").value<QObject*>();
-        part->setProperty("has_activity", QVariant(false));
-        part->setProperty("has_silence", QVariant(false));
+        term->has_activity = false;
+        term->has_silence = false;
         tabBar()->update();
-        setWindowTitle(part->property("term_title").toString());
+        setWindowTitle(term->title);
     } else if (! qApp->dragged_part) {
         close();
     }
@@ -131,14 +127,14 @@ void TabWindow::changed_tab(int index)
 
 QString TabWindow::current_dir()
 {
-    TerminalInterface* term = qobject_cast<TerminalInterface*>(currentWidget()->property("kpart").value<QObject*>());
-    int pid = term->terminalProcessId();
+    TerminalInterface* part = currentTerminal()->terminalInterface();
+    int pid = part->terminalProcessId();
 
     char buffer[MAXPATHLEN+1], fname[100];
     snprintf(fname, 100, "/proc/%i/cwd", pid);
     int length = readlink(fname, buffer, MAXPATHLEN);
     if (length == -1) {
-        return term->currentWorkingDirectory();
+        return part->currentWorkingDirectory();
     }
 
     buffer[length] = '\0';
@@ -186,19 +182,19 @@ void TabBar::paintEvent(QPaintEvent*)
         label_rect.moveTo(tab.rect.x(), tab.rect.y());
         tab.rect.adjust(label_width, 0, 0, 0);
 
-        TermPart* part = tabData(i).value<TermPart*>();
-        tab.text = fontMetrics().elidedText(part->property("term_title").toString(), elideMode(), tab.rect.width());
+        Terminal* term = tabData(i).value<Terminal*>();
+        tab.text = fontMetrics().elidedText(term->title, elideMode(), tab.rect.width());
 
-        if (part->property("has_activity").toBool()) {
+        if (term->has_activity) {
             tab.state |= QStyle::State_On;
         }
 
-        if (part->property("has_silence").toBool()) {
+        if (term->has_silence) {
             tab.state |= QStyle::State_Off;
         }
 
         // only :pressed if dragging
-        if (qApp->dragged_part && qApp->dragged_part == tabData(i).value<TermPart*>()) {
+        if (qApp->dragged_part && qApp->dragged_part == tabData(i).value<Terminal*>()) {
             tab.state |= QStyle::State_Sunken;
         } else {
             tab.state &= ~QStyle::State_Sunken;

@@ -3,9 +3,8 @@
 #include <QTabWidget>
 #include <QPoint>
 #include <QSettings>
-#include <kde_terminal_interface.h>
 
-#include "main.h"
+#include "terminal.h"
 
 #ifndef TABWINDOW_H
 #define TABWINDOW_H
@@ -29,8 +28,9 @@ class TabWindow : public QTabWidget
 public:
     TabWindow();
     ~TabWindow() {};
-    int new_tab(int, TermPart*, QString = QString());
+    int new_tab(int, Terminal*, QString = QString());
     void load_settings(QSettings*);
+    Terminal* currentTerminal() { return qobject_cast<Terminal*>(currentWidget()); };
 
 protected:
     void closeEvent(QCloseEvent*);

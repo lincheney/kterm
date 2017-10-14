@@ -11,95 +11,12 @@
 #include "tabwindow.h"
 #include "x.h"
 
-QObject* find_child(QObject* parent, const char* classname)
-{
-    foreach(QObject* child, parent->children()) {
-        if (child->inherits(classname)) return child;
-    }
-    return NULL;
-}
-
-KService::Ptr TermApp::konsole_service()
-{
-    if (! m_service) {
-        m_service = KService::serviceByDesktopName("konsolepart");
-    }
-    return m_service;
-}
-
-TermPart* TermApp::make_term(QString pwd)
-{
-    QDir::setCurrent(pwd);
-
-    TermPart* part = konsole_service()->createInstance<KParts::ReadOnlyPart>();
-    if (! part) return NULL;
-
-    QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
-    QMetaObject::invokeMethod(part, "setMonitorSilenceEnabled", Qt::DirectConnection, Q_ARG(bool, true));
-
-    connect(part, SIGNAL(activityDetected()), SLOT(slotTermActivityDetected()));
-    connect(part, SIGNAL(silenceDetected()), SLOT(slotTermSilenceDetected()));
-    connect(part, &KParts::Part::setWindowCaption, this, &TermApp::slotTermSetWindowCaption);
-    connect(part, SIGNAL(overrideShortcut(QKeyEvent*, bool&)), SLOT(slotTermOverrideShortcut(QKeyEvent*, bool&)) );
-    part->widget()->setProperty("kpart", QVariant::fromValue(part));
-
-    QObject* view_mgr = find_child(part, "Konsole::ViewManager");
-    QObject* session_controller = find_child(view_mgr, "Konsole::SessionController");
-
-    QScrollBar* scrollbar = part->widget()->findChild<QScrollBar*>(QString(), Qt::FindChildrenRecursively);
-    part->widget()->setProperty("scrollbar", QVariant::fromValue(scrollbar));
-
-    part->setProperty("session_controller", QVariant::fromValue(session_controller));
-
-    return part;
-}
-
-void TermApp::new_window(TermPart* part, QString pwd=QString())
+void TermApp::new_window(Terminal* term, QString pwd=QString())
 {
     TabWindow* tabs = new TabWindow();
     tabs->tabBar()->installEventFilter(this);
     tabs->show();
-    tabs->new_tab(-1, part, pwd);
-}
-
-void TermApp::slotTermActivityDetected()
-{
-    TermPart* part = (TermPart*)QObject::sender();
-    TabWindow* tabs = part->property("tabwidget").value<TabWindow*>();
-
-    if (tabs->currentWidget() != part->widget() && ! part->property("has_activity").toBool()) {
-        part->setProperty("has_activity", QVariant(true));
-        part->setProperty("has_silence", QVariant(false));
-        part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
-    }
-}
-
-void TermApp::slotTermSilenceDetected()
-{
-    TermPart* part = (TermPart*)QObject::sender();
-    TabWindow* tabs = part->property("tabwidget").value<TabWindow*>();
-
-    if (tabs->currentWidget() != part->widget() && ! part->property("has_silence").toBool() && part->property("has_activity").toBool()) {
-        part->setProperty("has_silence", QVariant(true));
-        part->setProperty("has_activity", QVariant(false));
-        part->property("tabwidget").value<QTabWidget*>()->tabBar()->update();
-    }
-}
-
-void TermApp::slotTermSetWindowCaption(QString caption)
-{
-    TermPart* part = qobject_cast<TermPart*>(QObject::sender());
-    part->setProperty("term_title", QVariant(caption));
-    QTabWidget* tabs = part->property("tabwidget").value<QTabWidget*>();
-    tabs->tabBar()->update();
-    if (tabs->currentWidget() == part->widget()) {
-        tabs->setWindowTitle(caption);
-    }
-}
-
-void TermApp::slotTermOverrideShortcut(QKeyEvent*, bool &override)
-{
-    override = false;
+    tabs->new_tab(-1, term, pwd);
 }
 
 void TermApp::load_settings() {
@@ -179,7 +96,7 @@ bool TermApp::eventFilter(QObject* obj, QEvent* event)
                         // start dragging
                         setOverrideCursor(Qt::DragCopyCursor);
 
-                        dragged_part = bar->tabData(current).value<TermPart*>();
+                        dragged_part = bar->tabData(current).value<Terminal*>();
                         bar->update();
                     }
 
@@ -251,7 +168,7 @@ int main (int argc, char **argv)
     app.load_settings();
     app.setWindowIcon(QIcon::fromTheme("utilities-terminal"));
 
-    if (! app.konsole_service() ) {
+    if (! Terminal::konsole_service() ) {
         qCritical() << "Unable to start Konsole::Part service";
         app.quit();
         return 1;

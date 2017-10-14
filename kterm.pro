@@ -1,5 +1,5 @@
-SOURCES += main.cpp tabwindow.cpp x.cpp
-HEADERS += main.h tabwindow.h x.h
+SOURCES += main.cpp tabwindow.cpp x.cpp terminal.cpp
+HEADERS += main.h tabwindow.h x.h terminal.h
 TARGET = kterm
 
 CONFIG += qt
