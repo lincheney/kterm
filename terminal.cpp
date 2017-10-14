@@ -1,3 +1,4 @@
+#include <QStackedLayout>
 #include "terminal.h"
 
 KService::Ptr _konsole_service;
@@ -24,10 +25,11 @@ Terminal* Terminal::make_term() {
 
 Terminal::Terminal(KParts::ReadOnlyPart* part) : QWidget() {
     m_part = part;
-    m_widget = part->widget();
     part->setParent(this);
-    m_widget->setParent(this);
+    new QStackedLayout(this);
 
+    m_widget = part->widget();
+    layout()->addWidget(m_widget);
     setFocusProxy(m_widget);
 
     QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
