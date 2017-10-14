@@ -31,6 +31,7 @@ public slots:
     void setWindowCaption(QString);
     void activityDetected();
     void silenceDetected();
+    void closeTerminal();
 
 private:
     KParts::ReadOnlyPart* m_part;

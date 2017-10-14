@@ -46,7 +46,7 @@ Terminal::Terminal(KParts::ReadOnlyPart* part, const QStringList& args) : QWidge
     QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
     QMetaObject::invokeMethod(part, "setMonitorSilenceEnabled", Qt::DirectConnection, Q_ARG(bool, true));
 
-    connect(part, &QObject::destroyed, this, &QObject::deleteLater);
+    connect(part, &QObject::destroyed, this, &Terminal::closeTerminal);
     connect(part, SIGNAL(activityDetected()), SLOT(activityDetected()));
     connect(part, SIGNAL(silenceDetected()), SLOT(silenceDetected()));
 
@@ -92,5 +92,13 @@ void Terminal::silenceDetected() {
         has_silence = true;
         has_activity = false;
         tabwidget->tabBar()->update();
+    }
+}
+
+void Terminal::closeTerminal() {
+    if (tabwidget) {
+        tabwidget->removeTab(tabwidget->indexOf(this));
+    } else {
+        deleteLater();
     }
 }
