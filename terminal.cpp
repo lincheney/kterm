@@ -28,6 +28,7 @@ Terminal* Terminal::make_term(const QString& pwd, const QStringList& args) {
     return new Terminal(part, args);
 }
 
+// typedef QObject ViewProperties;
 Terminal::Terminal(KParts::ReadOnlyPart* part, const QStringList& args) : QWidget() {
     m_part = part;
     part->setParent(this);
@@ -39,6 +40,8 @@ Terminal::Terminal(KParts::ReadOnlyPart* part, const QStringList& args) : QWidge
 
     if (! args.isEmpty())
         terminalInterface()->startProgram(args[0], args);
+
+    // all manner of hacks below
 
     QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
     QMetaObject::invokeMethod(part, "setMonitorSilenceEnabled", Qt::DirectConnection, Q_ARG(bool, true));
@@ -54,6 +57,9 @@ Terminal::Terminal(KParts::ReadOnlyPart* part, const QStringList& args) : QWidge
     m_session_controller = find_child(view_mgr, "Konsole::SessionController");
 
     m_scrollbar = m_widget->findChild<QScrollBar*>(QString(), Qt::FindChildrenRecursively);
+
+    // hack initialise title
+    QMetaObject::invokeMethod(part, "activeViewTitleChanged", Qt::DirectConnection, QArgument<QObject*>("ViewProperties*", m_session_controller));
 }
 
 Terminal::~Terminal() { }
