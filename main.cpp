@@ -46,7 +46,7 @@ void TermApp::drag_tabs(QPoint pos, bool split)
 {
     QTabBar* bar;
     TabWindow* _new_window = qobject_cast<TabWindow*>(topLevelAt(pos));
-    TabWindow* _old_window = dragged_part->property("tabwidget").value<TabWindow*>();
+    QTabWidget* _old_window = dragged_part->tabwidget;
 
     if (!_new_window) {
         if (split && _old_window->count() > 1) {
