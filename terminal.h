@@ -12,7 +12,7 @@ class Terminal : public QWidget {
     Q_OBJECT
 
 public:
-    Terminal(KParts::ReadOnlyPart*, const QString&, const QStringList&);
+    Terminal(KParts::ReadOnlyPart*, const QStringList&);
     ~Terminal();
     static Terminal* make_term(const QString&, const QStringList&);
     static KService::Ptr konsole_service();

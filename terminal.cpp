@@ -1,4 +1,6 @@
 #include <QStackedLayout>
+#include <QDir>
+
 #include "terminal.h"
 
 KService::Ptr _konsole_service;
@@ -18,12 +20,15 @@ QObject* find_child(QObject* parent, const char* classname) {
 }
 
 Terminal* Terminal::make_term(const QString& pwd, const QStringList& args) {
+    if (! pwd.isEmpty())
+        QDir::setCurrent(pwd);
+
     KParts::ReadOnlyPart* part = konsole_service()->createInstance<KParts::ReadOnlyPart>();
     if (! part) return NULL;
-    return new Terminal(part, pwd, args);
+    return new Terminal(part, args);
 }
 
-Terminal::Terminal(KParts::ReadOnlyPart* part, const QString& pwd, const QStringList& args) : QWidget() {
+Terminal::Terminal(KParts::ReadOnlyPart* part, const QStringList& args) : QWidget() {
     m_part = part;
     part->setParent(this);
     new QStackedLayout(this);
