@@ -28,7 +28,7 @@ class TabWindow : public QTabWidget
 public:
     TabWindow();
     ~TabWindow() {};
-    int new_tab(int, Terminal*, QString = QString());
+    int new_tab(int, Terminal*, const QString& = QString(), const QStringList& = QStringList());
     void load_settings(QSettings*);
     Terminal* currentTerminal() { return qobject_cast<Terminal*>(currentWidget()); };
 

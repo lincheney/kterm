@@ -17,13 +17,13 @@ QObject* find_child(QObject* parent, const char* classname) {
     return NULL;
 }
 
-Terminal* Terminal::make_term() {
+Terminal* Terminal::make_term(const QString& pwd, const QStringList& args) {
     KParts::ReadOnlyPart* part = konsole_service()->createInstance<KParts::ReadOnlyPart>();
     if (! part) return NULL;
-    return new Terminal(part);
+    return new Terminal(part, pwd, args);
 }
 
-Terminal::Terminal(KParts::ReadOnlyPart* part) : QWidget() {
+Terminal::Terminal(KParts::ReadOnlyPart* part, const QString& pwd, const QStringList& args) : QWidget() {
     m_part = part;
     part->setParent(this);
     new QStackedLayout(this);
@@ -31,6 +31,9 @@ Terminal::Terminal(KParts::ReadOnlyPart* part) : QWidget() {
     m_widget = part->widget();
     layout()->addWidget(m_widget);
     setFocusProxy(m_widget);
+
+    if (! args.isEmpty())
+        terminalInterface()->startProgram(args[0], args);
 
     QMetaObject::invokeMethod(part, "setMonitorActivityEnabled", Qt::DirectConnection, Q_ARG(bool, true));
     QMetaObject::invokeMethod(part, "setMonitorSilenceEnabled", Qt::DirectConnection, Q_ARG(bool, true));

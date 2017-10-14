@@ -95,9 +95,9 @@ int TabWindow::offset_index(int offset)
     return (currentIndex() + offset + count()) % count();
 }
 
-int TabWindow::new_tab(int index, Terminal* term, QString pwd)
+int TabWindow::new_tab(int index, Terminal* term, const QString& pwd, const QStringList& args)
 {
-    term = term ? term : Terminal::make_term();
+    term = term ? term : Terminal::make_term(pwd, args);
     if (! term) {
         qApp->quit();
         return -1;

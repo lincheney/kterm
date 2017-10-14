@@ -16,8 +16,8 @@ public:
     QSettings* settings() { return m_settings; }
 
 public Q_SLOTS:
-    void new_window(Terminal*, QString);
-    void new_window(QString pwd){ new_window(NULL, pwd); };
+    void new_window(Terminal* = NULL, const QString& = QString(), const QStringList& = QStringList());
+    void new_window(QString pwd){ new_window(NULL, pwd, QStringList()); };
     void load_settings();
 
 protected:

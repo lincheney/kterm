@@ -11,12 +11,12 @@
 #include "tabwindow.h"
 #include "x.h"
 
-void TermApp::new_window(Terminal* term, QString pwd=QString())
+void TermApp::new_window(Terminal* term, const QString& pwd, const QStringList& args)
 {
     TabWindow* tabs = new TabWindow();
     tabs->tabBar()->installEventFilter(this);
     tabs->show();
-    tabs->new_tab(-1, term, pwd);
+    tabs->new_tab(-1, term, pwd, args);
 }
 
 void TermApp::load_settings() {
