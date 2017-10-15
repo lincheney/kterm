@@ -26,6 +26,7 @@ TabWindow::TabWindow() : QTabWidget()
 
     QToolButton* menu_button = new QToolButton();
     menu_button->setPopupMode(QToolButton::InstantPopup);
+    menu_button->setAutoRaise(true);
     menu_button->setIcon(QIcon::fromTheme("system-run"));
     setCornerWidget(menu_button);
 
