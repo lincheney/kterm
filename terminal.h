@@ -33,6 +33,9 @@ public slots:
     void silenceDetected();
     void closeTerminal();
 
+    void increaseFontSize(){ QMetaObject::invokeMethod(m_session_controller, "increaseFontSize", Qt::DirectConnection); };
+    void decreaseFontSize(){ QMetaObject::invokeMethod(m_session_controller, "decreaseFontSize", Qt::DirectConnection); };
+
 private:
     KParts::ReadOnlyPart* m_part;
     QWidget* m_widget;

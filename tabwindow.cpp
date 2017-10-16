@@ -79,6 +79,9 @@ TabWindow::TabWindow() : QTabWidget()
             bar->setValue(bar->maximum());
     });
 
+    MAKE_ACTION("Increase font size", Qt::CTRL + Qt::Key_Plus, [=](){ currentTerminal()->increaseFontSize(); });
+    MAKE_ACTION("Decrease font size", Qt::CTRL + Qt::SHIFT + Qt::Key_Minus, [=](){ currentTerminal()->decreaseFontSize(); });
+
     load_settings(new QSettings());
 }
 

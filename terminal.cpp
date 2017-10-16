@@ -1,5 +1,6 @@
 #include <QStackedLayout>
 #include <QDir>
+#include <QDebug>
 
 #include "terminal.h"
 
