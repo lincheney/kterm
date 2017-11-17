@@ -11,6 +11,8 @@
 #include "tabwindow.h"
 #include "x.h"
 
+void qt_set_sequence_auto_mnemonic(bool b);
+
 void TermApp::new_window(Terminal* term, const QString& pwd, const QStringList& args)
 {
     TabWindow* tabs = new TabWindow();
@@ -172,6 +174,7 @@ int main (int argc, char **argv)
         }
     }
 
+    qt_set_sequence_auto_mnemonic(false);
     app.load_settings();
     app.setWindowIcon(QIcon::fromTheme("utilities-terminal"));
 
