@@ -27,7 +27,7 @@ TabWindow::TabWindow() : QTabWidget()
     QToolButton* menu_button = new QToolButton();
     menu_button->setPopupMode(QToolButton::InstantPopup);
     menu_button->setAutoRaise(true);
-    menu_button->setIcon(QIcon::fromTheme("system-run"));
+    menu_button->setIcon(QIcon::fromTheme("document-properties"));
     setCornerWidget(menu_button);
 
     QAction* action;
@@ -43,7 +43,7 @@ TabWindow::TabWindow() : QTabWidget()
     menu_button->addAction(action);
 
     MAKE_ACTION("New tab", Qt::CTRL + Qt::SHIFT + Qt::Key_T, [=](){ new_tab(-1, NULL, current_dir()); });
-    action->setIcon(QIcon::fromTheme("list-add"));
+    action->setIcon(QIcon::fromTheme("tab-new", QIcon::fromTheme("list-add")));
     menu_button->addAction(action);
 
     MAKE_ACTION("Reload settings", 0, [=](){ qApp->load_settings(); });
